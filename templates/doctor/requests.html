@@ -1,0 +1,39 @@
+{% extends '../_base.html' %}
+
+{% block content %}
+{% for request in pending_requests %}
+<div class="request-card">
+    <h4>{{ request.patient.name }}</h4>
+    <p><strong>Request Status:</strong> {{ request.status }}</p>
+    <button class="button accept-button" onclick="updateRequest('{{ request.patient.id }}', 'accept')">Accept</button>
+    <button class="button reject-button" onclick="updateRequest('{{ request.patient.id }}', 'reject')">Reject</button>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}    
+<script>
+function updateRequest(patientId, action) {
+    const formData = new FormData();
+    formData.append('patient_id', patientId);
+    formData.append('action', action);
+
+    fetch("{% url 'doctor_requests' %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        location.reload();
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred.");
+    });
+}
+</script>
+{% endblock %}

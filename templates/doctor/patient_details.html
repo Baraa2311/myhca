@@ -1,0 +1,20 @@
+{% extends '../_base.html' %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-image">
+                <img src="{{ patient.profile_image.url }}" alt="{{ patient.name }}">  
+        </div>
+        <div class="profile-info">
+            <h2>{{ patient.name }}</h2>
+            <p>Email: {{ patient.email }}</p>
+            <p>Phone: {{ patient.phone_number }}</p>
+            <p>DOB: {{ patient.date_of_birth }}</p>
+            <a href="{% url 'patient_records' patient.pk %}" class="btn btn-primary">Medical Records</a>
+            <a href="{% url 'patient_diagnostics' patient.pk %}" class="btn btn-primary">Diagnostics</a>
+               <a href="{% url 'patient_prescriptions' patient.pk %}" class="btn btn-primary">Prescriptions</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

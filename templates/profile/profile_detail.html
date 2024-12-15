@@ -1,0 +1,25 @@
+{% extends '../_base.html' %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-image">
+                <img src="{{ user_profile.profile_image.url }}" alt="{{ user_profile.name }}">  
+        </div>
+        <div class="profile-info">
+            <h2>{{ user_profile.name }}</h2>
+            <p>Email: {{ user_profile.email }}</p>
+            <p>Phone: {{ user_profile.phone_number }}</p>
+            {% if user_profile.is_patient %}
+                <p>Type: Patient</p>
+            {% elif user_profile.is_doctor %}
+                <p>Type: Doctor</p>
+                <p>Bio: {{ user_profile.bio }}</p>
+            {% elif user_profile.is_administrator %}
+                <p>Type: Administrator</p>
+            {% endif %}
+            <a href="{% url 'profile_edit' %}" class="btn btn-primary">Edit Profile</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

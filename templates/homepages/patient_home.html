@@ -1,0 +1,40 @@
+{% extends '../_base.html' %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+
+{% block hero %}
+<div class="hero">
+    <h1>Welcome, {{ user.name }}!</h1>
+    <p>Manage your health and appointments with ease.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="services">
+    <h2>Patient Features</h2>
+    <div class="service-cards">
+        <div class="service-card">
+            <h3>Doctors</h3>
+            <p>See and select your personal doctors to treat you.</p>
+            <a href="{% url 'select_doctor' %}" class="button">Select Now</a>
+        </div>
+        <div class="service-card">
+            <h3>Book Appointment</h3>
+            <p>Schedule an appointment with your preferred doctor.</p>
+            <a href="" class="button">Book Now</a>
+        </div>
+        <div class="service-card">
+            <h3>Medical Records</h3>
+            <p>Access your past medical records and prescriptions.</p>
+            <a href="{% url 'view_medical_files' %}" class="button">View Records</a> |
+            <a href="{% url 'upload_medical_file' %}" class="button">Upload Records</a>
+        </div>
+        <div class="service-card">
+            <h3>Diagnostics and prescriptions</h3>
+            <p>See the diagnostics and prescriptions that your doctors gave to you.</p>
+            <a href="" class="button">View</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

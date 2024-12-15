@@ -1,0 +1,29 @@
+{% extends '../_base.html' %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+    <h2 class="my-4">Patients</h2>
+
+    <div class="row">  
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Patients</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                       {% for patient in patients %}
+                         <li class="list-group-item">
+                {{ patient.name }} - {{ patient.email }}
+        <a href="{% url 'patient_details' patient.pk %}" class="btn btn-sm btn-primary float-end ml-2">Details</a>
+    </li>
+{% empty %}
+    <li>No patients available</li>
+{% endfor %}
+                    </ul>                
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

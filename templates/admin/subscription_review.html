@@ -1,0 +1,122 @@
+{% extends '../_base.html' %}
+
+{% block title %}User Review{% endblock %}
+
+{% block content %}
+<h1>Review Pending Registrations</h1>
+
+<!-- Search Bar -->
+<div class="search-container">
+    <input type="text" id="searchBar" placeholder="Search by name or email..." onkeyup="filterCards()">
+</div>
+
+<!-- Cards Container -->
+<div class="card-container">
+    <section class="user-management">
+        <h1>Manage Users</h1>
+        <div id="userCards" class="user-cards">
+            {% for user in users %}
+                {% if not user.is_active %}
+                <div class="card">
+                    <div class="card-header">
+                        <h2>{{ user.name }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Email:</strong> {{ user.email }}</p>
+                        <p><strong>Role:</strong> {{ user.user_type }}</p>
+                        <div class="button-group">
+                            <button class="btn accept-btn" onclick="handleDecision('{{ user.id }}', true)">Accept</button>
+                            <button class="btn decline-btn" onclick="handleDecision('{{ user.id }}', false)">Decline</button>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="">
+                            More
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div id="pagination" class="pagination"></div>
+    </section>
+</div>
+
+<script>
+    let currentPage = 1;
+    const itemsPerPage = 5;
+
+    // Pagination logic
+    function paginate() {
+        const cards = document.querySelectorAll(".card");
+        const totalItems = cards.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        cards.forEach((card, index) => {
+            card.style.display =
+                index >= (currentPage - 1) * itemsPerPage && index < currentPage * itemsPerPage
+                    ? "block"
+                    : "none";
+        });
+
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+        for (let i = 1; i <= totalPages; i++) {
+            const pageButton = document.createElement("button");
+            pageButton.textContent = i;
+            pageButton.className = i === currentPage ? "active" : "";
+            pageButton.onclick = () => {
+                currentPage = i;
+                paginate();
+            };
+            pagination.appendChild(pageButton);
+        }
+    }
+
+    // Filter logic
+    function filterCards() {
+        const searchValue = document.getElementById("searchBar").value.toLowerCase();
+        const cards = document.querySelectorAll(".card");
+        cards.forEach((card) => {
+            const name = card.querySelector(".card-header h2").textContent.toLowerCase();
+            const email = card.querySelector(".card-body p:nth-child(2)").textContent.toLowerCase();
+            card.style.display = name.includes(searchValue) || email.includes(searchValue) ? "block" : "none";
+        });
+        paginate();
+    }
+
+    // Handle decision logic
+    function handleDecision(userId, isAccepted) {
+        const confirmation = isAccepted
+            ? confirm("Are you sure you want to accept this user?")
+            : confirm("Are you sure you want to decline this user?");
+        if (confirmation) {
+            const formData = new FormData();
+            formData.append("user_id", userId);
+            formData.append("decision", isAccepted ? "accept" : "decline");
+
+            fetch("{% url 'review_decision' %}", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    alert(data.message);
+                    location.reload();
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    alert("An error occurred. Please try again.");
+                });
+        }
+    }
+
+    // Initialize pagination on load
+    document.addEventListener("DOMContentLoaded", () => {
+        paginate();
+    });
+</script>
+{% endblock %}

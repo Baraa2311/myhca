@@ -1,0 +1,7 @@
+<h2>Available Slots for Dr. {{ doctor.name }}</h2>
+<p>Today: {{ today }}</p>
+<ul>
+    {% for slot in slots %}
+        <li>{{ slot }}</li>
+    {% endfor %}
+</ul>

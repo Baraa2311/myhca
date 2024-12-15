@@ -1,0 +1,12 @@
+{% extends '../_base.html' %}
+
+{% block content %}
+<div class="doctor-details">
+    <img src="{{ doctor.profile_image.url }}" alt="{{ doctor.name }}" class="profile-img">
+    <h2>Dr. {{ doctor.name }}</h2>
+    <p><strong>Specialty:</strong> {{ doctor.specialty }}</p>
+    <p>{{ doctor.bio }}</p>
+    <p><strong>Contact:</strong> {{ doctor.email }}</p>
+    <button class="button back-button" onclick="history.back()">Back</button>
+</div>
+{% endblock %}

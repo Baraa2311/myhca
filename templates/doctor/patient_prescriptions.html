@@ -1,0 +1,35 @@
+{% extends '../_base.html' %}
+
+{% block title %}Prescriptions{% endblock %}
+
+{% block content %}
+    <h2 class="my-4">Prescriptions</h2>
+
+    <div class="row">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="list-group">
+                       {% for prescription in prescriptions %}
+    <li class="list-group-item">
+        <h4> Medication Name</h4>
+        <p>{{ prescription.medication_name }} </p>
+        <h4> Dosage</h4>
+        <p>{{ prescription.dosage }}</p>
+         <h4> Instructions</h4>
+        <p>{{ prescription.instructions }}</p>
+        <a href="{% url 'prescription_update' prescription.id %}" class="btn btn-sm btn-primary float-end ml-2">Edit</a>
+        <a href="{% url 'prescription_delete' prescription.id %}" class="btn btn-sm btn-primary float-end ml-2">Delete</a>
+    </li>
+{% empty %}
+    <li>No Prescriptions available</li>
+{% endfor %}
+
+
+                    </ul>
+                    <a href="{% url 'prescription_create' patient_id %}" class="btn btn-primary mt-3">Add New Prescription</a>
+                </div>
+            </div>
+        </div>   
+    </div>
+{% endblock %}

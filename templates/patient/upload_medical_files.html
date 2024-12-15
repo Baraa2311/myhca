@@ -1,0 +1,91 @@
+{% extends '../_base.html' %}
+{% block title %}Upload Medical Files{% endblock %}
+{% block content %}
+<div class="hero">
+    <h1>Upload Medical Files</h1>
+    <p>Upload photos, videos, CT scans, or other medical documents for your records.</p>
+</div>
+
+<div class="upload-form">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="button">Upload</button>
+    </form>
+</div>
+
+<style>
+    .hero {
+        background-color: #f0f4f8;
+        padding: 4rem 2rem;
+        text-align: center;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .hero h1 {
+        font-size: 2.5rem;
+        color: #333;
+    }
+    .hero p {
+        font-size: 1.2rem;
+        color: #555;
+    }
+
+    .upload-form {
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 8px;
+        max-width: 600px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group p {
+        font-size: 1rem;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-form button {
+        background-color: #007bff;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: background-color 0.3s;
+    }
+
+    .upload-form button:hover {
+        background-color: #0056b3;
+    }
+
+    .upload-form input[type="file"] {
+        padding: 1rem;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        margin-bottom: 1.5rem;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .upload-form input[type="file"]:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+
+    .upload-form .button {
+        display: inline-block;
+        text-align: center;
+        cursor: pointer;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}

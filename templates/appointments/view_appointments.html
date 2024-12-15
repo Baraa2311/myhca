@@ -1,0 +1,6 @@
+<h2>Your Appointments</h2>
+<ul>
+    {% for appointment in appointments %}
+        <li>{{ appointment.doctor.name }} - {{ appointment.appointment_date }} at {{ appointment.start_time }} ({{ appointment.duration }} minutes)</li>
+    {% endfor %}
+</ul>

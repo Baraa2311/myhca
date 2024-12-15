@@ -1,0 +1,426 @@
+{% extends "../_base.html" %}
+{% load static %}
+{% block content %}
+<div class="hero">
+    <h1>Select a Doctor</h1>
+    <p>Choose your preferred doctor by specialty or view your currently selected doctors.</p>
+</div>
+
+<section class="services">
+    <h2>Your Selected Doctors</h2>
+    <div class="selected-doctors">
+        {% if relations %}
+            {% for relation in relations %}
+    <div class="doctor-card {% if relation.status == 'Pending' %}pending{% else %}selected{% endif %}">
+        <img src="{{ relation.doctor.profile_image.url }}" alt="{{ relation.doctor.name }}" class="profile-img">
+        <h4>Dr. {{ relation.doctor.name }}</h4>
+        <p><strong>Specialty:</strong> {{ relation.doctor.specialty }}</p>
+         <p><strong>Status:</strong> {{ relation.status }}</p>
+        <p>{{ relation.doctor.bio }}</p>
+        <button class="button details-button" onclick="location.href='{% url 'doctor_details' relation.doctor.id %}'">Details</button>
+        <button class="button delete-button" onclick="location.href='{% url 'delete_doctor' relation.doctor.id %}'">Delete</button>
+        {% if relation.status != 'Pending' %}
+       
+             {% if relation.doctor.has_appointment %}
+           <!-- Add the delete button next to the appointment details -->
+<p><strong>Appointment:</strong></p>
+<p><strong>Date:</strong> {{ relation.doctor.has_appointment.date }}</p>
+<p><strong>Time:</strong> {{ relation.doctor.has_appointment.time }}</p>
+
+<button class="button delete-appointment-button" data-appointment-id="{{ relation.doctor.has_appointment.id }}" onclick="deleteAppointment({{ relation.doctor.has_appointment.id }})">Delete Appointment</button>
+        {% else %}
+            <!-- Book Appointment Button -->
+            <button class="button book-appointment-button" data-doctor-id="{{ relation.doctor.id }}" onclick="openBookingModal({{ relation.doctor.id }})">Book {% if relation.doctor.has_past_appointment %}Follow-Up{% else %}Appointment{% endif %}</button>
+        {% endif %}
+        {% endif %}
+    </div>
+{% endfor %}
+        {% else %}
+            <p>You have not selected any doctors yet.</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="services">
+    <h2>Available Doctors</h2>
+    <div class="specialties">
+        {% for specialty, doctors in specialties.items %}
+            <div class="specialty-section" data-specialty="{{ specialty }}">
+                <h3>{{ specialty }}</h3>
+                <div class="doctor-cards">
+                    {% for doctor in doctors %}
+                        {% if doctor not in selected_doctors %}
+                            <div class="doctor-card" data-doctorid="{{ doctor.id }}">
+                                {% if doctor.profile_image %}
+                                    <img src="{{ doctor.profile_image.url }}" alt="{{ doctor.name }}" class="profile-img">
+                                {% else %}
+                                    <img src="{% static 'images/default-profile.png' %}" alt="Default profile image" class="profile-img">
+                                {% endif %}
+                                <h4>Dr. {{ doctor.name }}</h4>
+                                <p>{{ doctor.bio }}</p>           
+                                <button class="button select-button" data-doctorid="{{ doctor.id }}" data-specialty="{{ doctor.specialty }}" onclick="save_doc('{{ doctor.id }}', '{{ doctor.specialty }}')">Select</button>
+                                
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% empty %}
+            <p>No doctors available for this specialty.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Modal for Booking Appointment -->
+<div id="appointment-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Book Appointment</h3>
+       <form id="appointment-form">
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" min="{{ today_date }}" required><br><br>
+
+    <label for="time">Time:</label>
+    <select id="time" name="time" required>
+        <option value="">Select a time</option>
+    </select><br><br>
+
+    <button type="submit" class="button">Confirm Appointment</button>
+</form>
+        <button class="button" onclick="closeBookingModal()">Close</button>
+    </div>
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    const dateInput = document.getElementById("date");
+    const today = new Date();
+    const formattedDate = today.toISOString().split("T")[0]; // Format date as YYYY-MM-DD
+    dateInput.setAttribute("min", formattedDate); // Set the minimum date
+});
+
+
+    let selectedDoctorId = null;
+
+    // Open the booking modal
+    function openBookingModal(doctorId) {
+        selectedDoctorId = doctorId;
+        
+        document.getElementById('appointment-modal').classList.remove('hidden');
+    }
+
+    // Close the booking modal
+    function closeBookingModal() {
+        document.getElementById('appointment-modal').classList.add('hidden');
+    }
+
+    // Save a selected doctor
+    function save_doc(docId, specialty) {
+        const formData = new FormData();
+        formData.append("specialty", specialty);
+        formData.append("doctor_id", docId);  
+        fetch("{% url 'select_doctor' %}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            alert(data.message);
+            location.reload();
+        })
+        .catch((error) => {
+            alert("Error: " + error.message);
+        });
+    }
+    
+    document.getElementById('appointment-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const doctorId = selectedDoctorId; 
+    const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value;
+
+    if (!doctorId || !date || !time) {
+        alert("All fields are required.");
+        return;
+    }
+
+    
+    fetch("{% url 'book_appointment' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({
+            doctor_id: doctorId,
+            date: date,
+            time: time,
+        }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(`Error: ${data.error}`);
+            } else {
+                alert("Appointment booked successfully!");
+                closeBookingModal();
+                location.reload(); // Reload the page to reflect changes
+            }
+        })
+        .catch(error => {
+            alert("An error occurred: " + error.message);
+        });
+});
+
+document.getElementById('date').addEventListener('change', function () {
+    const doctorId = selectedDoctorId; // Ensure `selectedDoctorId` is set correctly
+    const date = this.value;
+
+    if (!date) return;
+
+    fetch(`/api/slots/${doctorId}/?date=${date}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch slots');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const timeSelect = document.getElementById('time');
+            timeSelect.innerHTML = '<option value="">Select a time</option>'; // Clear previous options
+
+            // Get the current time if the selected date is today
+            const now = new Date();
+            const isToday = new Date(date).toDateString() === now.toDateString();
+            const currentTime = isToday ? now.getHours() * 60 + now.getMinutes() : null; // Time in minutes
+
+            // Filter and display slots
+            if (data.slots && data.slots.length > 0) {
+                data.slots.forEach(slot => {
+                    const [hours, minutes] = slot.split(':').map(Number); // Split and parse the time
+                    const slotTime = hours * 60 + minutes; // Convert to minutes
+
+                    // Only include slots after the current time if the date is today
+                    if (!isToday || slotTime > currentTime) {
+                        const option = document.createElement('option');
+                        option.value = slot;
+                        option.textContent = slot;
+                        timeSelect.appendChild(option);
+                    }
+                });
+            } else {
+                const option = document.createElement('option');
+                option.textContent = 'No slots available';
+                timeSelect.appendChild(option);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error.message);
+        });
+});
+
+    function deleteAppointment(appointmentId) {
+        if (!confirm("Are you sure you want to delete this appointment?")) return;
+
+        fetch("{% url 'delete_appointment' %}", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({
+                appointment_id: appointmentId
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(`Error: ${data.error}`);
+            } else {
+                alert("Appointment deleted successfully!");
+                location.reload(); // Refresh the page to reflect changes
+            }
+        })
+        .catch(error => {
+            alert("An error occurred: " + error.message);
+        });
+    }
+</script>
+
+<style>
+    .modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+    .modal.hidden {
+        display: none;
+    }
+    .modal-content {
+        max-width: 400px;
+        text-align: center;
+    }
+    .modal ul {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+    }
+    .modal li {
+        margin: 0.5rem 0;
+    }
+    .modal .button {
+        margin-top: 1rem;
+    }
+        .specialties {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .specialty-section {
+        background-color: #f9f9f9;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    .doctor-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .doctor-card {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        max-width: 200px;
+    }
+    .profile-img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+    }
+    .button {
+        background-color: #007bff;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+    .button:hover {
+        background-color: #0056b3;
+    }
+    
+  
+
+    .switch-button {
+        background-color: #28a745;
+    }
+
+    .switch-button:hover {
+        background-color: #218838;
+    }
+
+    .selected-message {
+        color: green;
+        font-weight: bold;
+        margin: 0.5rem 0;
+    }
+    /* Styles for the doctor's cards */
+    .doctor-card.selected {
+        border-color: #28a745;
+        box-shadow: 0 0 10px #28a745;
+    }
+    .doctor-card.pending{
+        border-color: orange;
+        box-shadow: 0 0 10px orange;
+    }
+</style>
+<style>
+    .modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+    .modal.hidden {
+        display: none;
+    }
+    .modal-content {
+        max-width: 400px;
+        text-align: center;
+    }
+    .modal ul {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+    }
+    .modal li {
+        margin: 0.5rem 0;
+    }
+    .modal .button {
+        margin-top: 1rem;
+    }
+    .specialties {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .specialty-section {
+        background-color: #f9f9f9;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    .doctor-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .doctor-card {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        max-width: 200px;
+    }
+    .profile-img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+    }
+    .button {
+        background-color: #007bff;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+    .button:hover {
+        background-color: #0056b3;
+    }
+    
+    .switch-button {
+        background-color: #28a745;
+    }
+{% endblock %}

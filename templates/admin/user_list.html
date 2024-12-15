@@ -1,0 +1,53 @@
+{% extends '../_base.html' %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+    <h2 class="my-4">User Management</h2>
+
+    <div class="row">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Doctors</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                       {% for doctor in doctors %}
+    <li class="list-group-item">
+        {{ doctor.name }} ({{ doctor.specialty }})
+        <a href="{% url 'edit_doctor' doctor.pk %}" class="btn btn-sm btn-primary float-end ml-2">Edit</a>
+    </li>
+{% empty %}
+    <li>No doctors available</li>
+{% endfor %}
+
+
+                    </ul>
+                    <a href="{% url 'add_doctor' %}" class="btn btn-primary mt-3">Add New Doctor</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Patients</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                       {% for patient in patients %}
+                         <li class="list-group-item">
+                {{ patient.name }} - {{ patient.email }}
+        <a href="{% url 'edit_patient' patient.pk%}" class="btn btn-sm btn-primary float-end ml-2">Edit</a>
+    </li>
+{% empty %}
+    <li>No patients available</li>
+{% endfor %}
+                    </ul>
+                    <a href="{% url 'add_patient' %}" class="btn btn-primary mt-3">Add New Patient</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
