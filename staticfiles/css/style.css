@@ -1,0 +1,464 @@
+/* General Reset */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    background-color: #f4f7fc;
+    color: #333;
+}
+
+/* Wrapper */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Header Styles */
+header {
+    background-color: #007bff;
+    padding: 15px 20px;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.navbar .logo {
+    height: 50px;
+}
+
+/* Navbar Menu */
+.navbar-menu {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-menu .nav-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar-menu .nav-links li {
+    position: relative;
+}
+
+.navbar-menu .nav-links li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+    font-weight: 500;
+    padding: 10px 15px;
+    border-radius: 5px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Hover effect for navbar links */
+.navbar-menu .nav-links li a:hover {
+    background-color: #0056b3;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Active link styling */
+.navbar-menu .nav-links li a.active {
+    background-color: #004085;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Adding a nice underline animation effect */
+.navbar-menu .nav-links li a::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background-color: #fff;
+    bottom: 0;
+    left: 50%;
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+.navbar-menu .nav-links li a:hover::before {
+    width: 100%;
+    left: 0;
+}
+
+/* Menu toggle button for mobile view */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    margin-left: 20px;
+}
+
+@media (max-width: 768px) {
+    /* Hide the navbar menu by default */
+    .navbar-menu {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    /* Show the navbar menu when 'show' class is applied */
+    .navbar-menu.show {
+        display: flex;
+    }
+
+    /* Adjust the navbar links */
+    .navbar-menu .nav-links li a {
+        font-size: 1.3em;
+        padding: 12px 20px;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+}
+
+/* Hero Section */
+.hero {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero h1 {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 1.2em;
+    margin-bottom: 25px;
+}
+
+.hero-buttons .button {
+    background-color: #fff;
+    color: #007bff;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin: 0 10px;
+}
+
+.hero-buttons .button:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+/* Services Section */
+.services {
+    background-color: #f4f7fc;
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.services h2 {
+    font-size: 2.5em;
+    margin-bottom: 40px;
+}
+
+.service-cards {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+    flex-wrap: wrap;
+    /* Ensures cards wrap on smaller screens */
+}
+
+.service-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 30%;
+    transition: all 0.3s ease;
+    min-width: 280px;
+    /* Prevents cards from becoming too small */
+    box-sizing: border-box;
+    max-width: 350px;
+    /* Limits card width to avoid overflow */
+    overflow: hidden;
+    /* Ensures content doesn't overflow */
+}
+
+.service-card h3 {
+    font-size: 1.6em;
+    margin-bottom: 15px;
+    overflow-wrap: break-word;
+    /* Wraps long words inside titles */
+}
+
+.service-card p {
+    font-size: 1.1em;
+    color: #555;
+    overflow-wrap: break-word;
+    /* Breaks long words */
+    word-wrap: break-word;
+    /* Ensures long words break within container */
+    max-height: 150px;
+    /* Limits paragraph height to avoid overflow */
+    overflow: hidden;
+    /* Hides overflowing content */
+    text-overflow: ellipsis;
+    /* Adds ellipsis for long text */
+}
+
+.service-card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+}
+
+/* Testimonials Section */
+.testimonials {
+    background-color: #ffffff;
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.testimonials h2 {
+    font-size: 2.5em;
+    margin-bottom: 40px;
+}
+
+.testimonials-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+}
+
+.testimonial-card {
+    background-color: #f4f7fc;
+    padding: 30px;
+    border-radius: 10px;
+    width: 45%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.testimonial-card p {
+    font-size: 1.2em;
+    color: #555;
+}
+
+.testimonial-card h4 {
+    font-size: 1.3em;
+    margin-top: 15px;
+    color: #007bff;
+}
+
+/* Contact Section */
+.contact {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.contact h2 {
+    font-size: 2.5em;
+    margin-bottom: 30px;
+}
+
+.contact p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.contact-buttons p {
+    font-size: 1.1em;
+}
+
+.contact-buttons a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2em;
+    transition: all 0.3s ease;
+}
+
+.contact-buttons a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Footer */
+.footer {
+    background-color: #222;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.footer p {
+    font-size: 1.1em;
+}
+
+.social-links a {
+    color: white;
+    font-size: 1.4em;
+    margin: 0 15px;
+    transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+    color: #007bff;
+}
+
+/* Scroll to Top Button */
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 50%;
+    font-size: 1.5em;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.scroll-to-top:hover {
+    background-color: #0056b3;
+}
+
+/* Extra custom styles */
+.hero h1 {
+    font-size: 3em;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.3em;
+    margin-bottom: 20px;
+}
+
+.services .service-card {
+    transition: transform 0.3s ease;
+}
+
+.services .service-card:hover {
+    transform: scale(1.05);
+}
+
+.testimonial-card h4 {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.contact-buttons a {
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.contact-buttons a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Scroll to Top Button */
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 50%;
+    font-size: 1.5em;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.scroll-to-top:hover {
+    background-color: #0056b3;
+}
+
+
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 20px;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-image img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.profile-info h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.profile-info p {
+    margin: 5px 0;
+    color: #555;
+}
+
+.btn-primary {
+    margin-top: 15px;
+    text-decoration: none;
+    color: #fff;
+    background-color: #007bff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.profile-edit-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.edit-profile-image-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
