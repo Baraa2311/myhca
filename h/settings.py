@@ -18,7 +18,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')  # Ensure you have the correct key i
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Allowed hosts for deployment (can add multiple)
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '.herokuapp.com').split(',')
+ALLOWED_HOSTS = ['ALLOWED_HOSTS', 'hca.up.railway.app','localhost','127.0.0.1']
+
+CSRF_TRUSTED_ORIGINS=['https://https://hca.up.railway.app/']
 
 # Application definition
 INSTALLED_APPS = [
