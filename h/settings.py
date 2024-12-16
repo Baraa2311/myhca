@@ -129,8 +129,7 @@ AUTH_USER_MODEL = 'accounts.UserBase'
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT =  'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / "static"]  # If you have additional static files to serve
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # BASE_DIR refers to the root of your project
 
 # Static files storage with WhiteNoise for Heroku
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
