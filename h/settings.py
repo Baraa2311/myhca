@@ -164,3 +164,5 @@ ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  # Redirect to home after login
 
 # Ensure username is not required (use email for login)
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None  # Don't use username
+
+WSGI_APPLICATION = 'h.wsgi.application'
