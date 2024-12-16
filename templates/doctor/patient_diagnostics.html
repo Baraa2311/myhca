@@ -10,23 +10,29 @@
             <div class="card">
                 <div class="card-body">
                     <ul class="list-group">
-                       {% for diagnostic in diagnosis %}
-    <li class="list-group-item">
-        <h4> Test</h4>
-        <p>{{ diagnostic.test_name }} </p>
-        <h4> Result</h4>
-        <p>{{ diagnostic.test_results }}</p>
-        <a href="{% url 'diagnostic_update' diagnostic.id %}" class="btn btn-sm btn-primary float-end ml-2">Edit</a>
-        <a href="{% url 'diagnostic_delete' diagnostic.id %}" class="btn btn-sm btn-primary float-end ml-2">Delete</a>
-        
-    </li>
-{% empty %}
-    <li>No Diagnostics available</li>
-{% endfor %}
+                        {% for diagnostic in diagnosis %}
+                            <li class="list-group-item">
+                                <h4>Test</h4>
+                                <p>{{ diagnostic.test_name }}</p>
+                                <h4>Result</h4>
+                                <p>{{ diagnostic.test_results }}</p>
 
-
+                                {% if request.user.user_type == 'doctor' %}
+                                    <a href="{% url 'diagnostic_update' diagnostic.id %}" class="btn btn-sm btn-primary float-end ml-2">Edit</a>
+                                    <a href="{% url 'diagnostic_delete' diagnostic.id %}" class="btn btn-sm btn-primary float-end ml-2">Delete</a>
+                                {% elif request.user.user_type == 'patient' %}
+                                    <h4>Doctor</h4>
+                                    <p>{{ diagnostic.doctor }}</p>
+                                {% endif %}
+                            </li>
+                        {% empty %}
+                            <li>No Diagnostics available</li>
+                        {% endfor %}
                     </ul>
-                    <a href="{% url 'diagnostic_create' patient_id %}" class="btn btn-primary mt-3">Add New Diagnostic</a>
+                    
+                    {% if request.user.user_type == 'doctor' %}
+                        <a href="{% url 'diagnostic_create' patient_id %}" class="btn btn-primary mt-3">Add New Diagnostic</a>
+                    {% endif %}
                 </div>
             </div>
         </div>   

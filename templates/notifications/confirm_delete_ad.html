@@ -1,0 +1,26 @@
+{% extends '../_base.html' %}
+{% load static %}
+{% block title %}Delete Medical Advice{% endblock %}
+
+{% block content %}
+  <div class="container my-5">
+    <h2 class="text-center mb-4">Are you sure you want to delete this Medical Advice?</h2>
+    <div class="card shadow-lg">
+      {% if object.image %}
+        <img src="{% static object.image.url %}" alt="{{ object.title }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+      {% else %}
+        <img src="{% static 'images/default_advice_image.jpg' %}" alt="Default Advice Image" class="card-img-top" style="height: 200px; object-fit: cover;">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ object.title }}</h5>
+        <p class="card-text">{{ object.advice }}</p>
+        <p class="text-muted small">By Dr. {{ object.created_by.name }} on {{ object.created_at|date:"F j, Y" }}</p>
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+          <a href="{% url 'advice_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

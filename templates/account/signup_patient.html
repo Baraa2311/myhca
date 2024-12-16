@@ -6,9 +6,72 @@
             <h2>Register as Patient</h2>
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
+                
+                <!-- Name Field -->
                 <div class="form-group">
-                   {{ form.as_p  }}
+                    <label for="{{ form.name.id_for_label }}">Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.name.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
+
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Phone Number Field -->
+                <div class="form-group">
+                    <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.phone_number.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Date of Birth Field -->
+                <div class="form-group">
+                    <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+                    {{ form.date_of_birth }}
+                    {% if form.date_of_birth.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.date_of_birth.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Medical History File Field -->
+                <div class="form-group">
+                    <label for="{{ form.medical_history_file.id_for_label }}">Medical History File</label>
+                    {{ form.medical_history_file }}
+                    {% if form.medical_history_file.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.medical_history_file.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
                 <button type="submit" class="btn btn-primary">Register</button>
             </form>
 
@@ -21,4 +84,16 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Add vanilla JavaScript for Datepicker (if using a custom solution) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var dobField = document.getElementById('id_date_of_birth');
+            
+            if (dobField) {
+                dobField.setAttribute('type', 'date'); // Set the input type to date
+                dobField.setAttribute('class', 'form-control'); // Apply Bootstrap styling
+            }
+        });
+    </script>
 {% endblock content %}

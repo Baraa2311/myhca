@@ -7,12 +7,13 @@ from .models import Diagnostic, Prescription
 from django.urls import reverse_lazy
 
 class DiagnosticListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    
     model = Diagnostic
     template_name = "doctor/patient_diagnostics.html"
     context_object_name = "diagnosis"
 
     def test_func(self):
-        return self.request.user.is_doctor
+        return self.request.user.is_doctor or self.request.user.is_patient
 
     def handle_no_permission(self):
         logger.warning(f"Access denied for user {self.request.user}. Not a doctor")
@@ -33,7 +34,7 @@ class PrescriptionListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     context_object_name = "prescriptions"
 
     def test_func(self):
-        return self.request.user.is_doctor
+        return self.request.user.is_doctor or self.request.user.is_patient
 
     def handle_no_permission(self):
         logger.warning(f"Access denied for user {self.request.user}. Not a doctor")

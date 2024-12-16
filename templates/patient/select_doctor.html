@@ -11,6 +11,7 @@
     <div class="selected-doctors">
         {% if relations %}
             {% for relation in relations %}
+            {{relation.doctor.profile_image.url}}
     <div class="doctor-card {% if relation.status == 'Pending' %}pending{% else %}selected{% endif %}">
         <img src="{{ relation.doctor.profile_image.url }}" alt="{{ relation.doctor.name }}" class="profile-img">
         <h4>Dr. {{ relation.doctor.name }}</h4>

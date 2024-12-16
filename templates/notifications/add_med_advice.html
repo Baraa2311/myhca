@@ -1,0 +1,49 @@
+{% extends '../_base.html' %}
+{% load static %}
+{% block title %}Add Medical Advice{% endblock %}
+
+{% block content %}
+  <div class="container my-5">
+    <h2 class="text-center mb-4">Add New Medical Advice</h2>
+
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <div class="card shadow-lg">
+          <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              {{ form.as_p }}
+
+             
+
+              <div class="form-group mt-3">
+                <button type="submit" class="btn btn-success btn-lg w-100">Save Advice</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    .card {
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      border-color: #28a745;
+    }
+
+    .btn-success:hover {
+      background-color: #218838;
+      border-color: #1e7e34;
+    }
+  </style>
+{% endblock %}

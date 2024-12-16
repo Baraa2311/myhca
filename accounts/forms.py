@@ -51,10 +51,17 @@ class DoctorSignUpForm(forms.ModelForm):
             instance.save()
         return instance
 
+from django import forms
+from .models import Patient
+from django.forms import DateInput
+
 class PatientSignUpForm(forms.ModelForm):
     class Meta:
         model = Patient
         fields = ['name', 'email', 'phone_number', 'date_of_birth', 'medical_history_file']
+        widgets = {
+            'date_of_birth': DateInput(attrs={'type': 'date', 'class': 'form-control', 'id': 'dob-datepicker'})
+        }
 
     def clean_date_of_birth(self):
         dob = self.cleaned_data.get('date_of_birth')

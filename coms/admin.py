@@ -1,25 +1,21 @@
 from django.contrib import admin
-from .models import Ad,MedicalAdvice
+from .models import Ad, MedicalAdvice
 
 
-
-# General Custom Admin
+# Ad Admin Configuration
 class AdAdmin(admin.ModelAdmin):
-    list_display = ('title', 'content', 'image', 'created_at')
-    search_fields = ('title', 'content', 'created_by', 'created_at')
+    list_display = ('title', 'created_by', 'created_at', 'image')  # What fields to show in the list view
+    list_filter = ('created_by', 'created_at')  # Filters to show in the sidebar
+    search_fields = ('title', 'content')  # Fields to search by in the admin interface
+    ordering = ('-created_at',)  # Order by creation date, descending
 
-    # For viewing/editing details
-    fieldsets = (
-        (None, {'fields': ('title', 'content', 'image')}),
-    )
+admin.site.register(Ad, AdAdmin)
 
-    # For creating new
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('title', 'content', 'image')}
-        ),
-    )
+# MedicalAdvice Admin Configuration
+class MedicalAdviceAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_by', 'created_at', 'advice', 'image')  # What fields to show in the list view
+    list_filter = ('created_by', 'created_at')  # Filters to show in the sidebar
+    search_fields = ('title', 'advice')  # Fields to search by in the admin interface
+    ordering = ('-created_at',)  # Order by creation date, descending
 
-# Register Models in Admin Site
-admin.site.register(Ad, AdAdmin)    
+admin.site.register(MedicalAdvice, MedicalAdviceAdmin)

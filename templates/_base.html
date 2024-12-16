@@ -9,17 +9,10 @@
     <title>{% block title %}Clinic{% endblock %}</title>
 
     <!-- Favicon -->
-    <link
-      rel="icon"
-      href="{% static 'images/favicon.ico' %}"
-      type="image/x-icon"
-    />
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon" />
 
     <!-- External Stylesheets (e.g., Google Fonts) -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
 
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
@@ -40,52 +33,56 @@
       <header>
         <nav class="navbar">
           <a class="navbar-brand" href="{% url 'home' %}">
-            <img
-              src="{% static 'images/logo.png' %}"
-              alt="Clinic Logo"
-              class="logo"
-            />
+            <img src="{% static 'images/logo.png' %}" alt="Clinic Logo" class="logo" />
           </a>
 
           <!-- Navbar Links -->
           <div class="navbar-menu" id="navbar-menu">
             {% if user.is_authenticated %}
             <ul class="nav-links">
-              <li>
-                <a href="{% url 'account_logout' %}" class="nav-link">Logout</a>
-              </li>
-              <li>
-                <a href="{% url 'profile' %}" class="nav-link">profile</a>
-              </li>
+              <li><a href="{% url 'account_logout' %}" class="nav-link">Logout</a></li>
+              <li><a href="{% url 'profile' %}" class="nav-link">Profile</a></li>
             </ul>
             {% else %}
             <ul class="nav-links">
-              <li>
-                <a href="{% url 'account_login' %}" class="nav-link">Login</a>
-              </li>
-              <li>
-                <a href="{% url 'doctor_signup' %}" class="nav-link">Doctor Sign Up</a>
-              </li>
-              <li>
-                <a href="{% url 'patient_signup' %}" class="nav-link">Patient Sign Up</a>
-              </li>
-              <li>
-                <a href="{% url 'admin_signup' %}" class="nav-link">Admin Sign Up</a>
-              </li>
+              <li><a href="{% url 'account_login' %}" class="nav-link">Login</a></li>
+              <li><a href="{% url 'doctor_signup' %}" class="nav-link">Doctor Sign Up</a></li>
+              <li><a href="{% url 'patient_signup' %}" class="nav-link">Patient Sign Up</a></li>
+              <li><a href="{% url 'admin_signup' %}" class="nav-link">Admin Sign Up</a></li>
             </ul>
             {% endif %}
           </div>
-          
-             <!-- Menu Button for Mobile View -->
-          <button
-            class="menu-toggle"
-            id="menu-toggle"
-            aria-label="Toggle Navigation"
-          >
-            &#9776;
-          </button>
+
+          <!-- Menu Button for Mobile View -->
+          <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation">&#9776;</button>
         </nav>
       </header>
+
+      <!-- Banner Section -->
+      {% if user.is_authenticated %}
+        <div class="ads-banner">
+          {% if user.user_type == 'doctor' %}
+            <div class="alert alert-info text-center d-flex align-items-center">
+              <img src="" alt="Doctor Tools" class="banner-image" />
+              <div class="banner-content">
+                <h5>Exclusive Tools for Doctors</h5>
+                <p>Explore the best tools and services for healthcare professionals.</p>
+              </div>
+            </div>
+          {% elif user.user_type == 'patient' %}
+            <div class="alert alert-success text-center d-flex align-items-center">
+              <img src="" alt="Health Tip" class="banner-image" />
+              <div class="banner-content">
+                <h5>Health Tip of the Day</h5>
+                <p>Stay active! Regular exercise helps maintain a healthy heart.</p>
+                <hr>
+                <h5>Recommended for You</h5>
+                <p>Find trusted clinics and pharmacies nearby.</p>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
 
       <!-- Hero Section -->
       {% block hero %}
