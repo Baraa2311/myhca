@@ -21,3 +21,4 @@ whitenoise==6.8.2
 psycopg2==2.9.10
 psycopg==3.2.3
 psycopg2-binary==2.9.10
+mailjet-rest

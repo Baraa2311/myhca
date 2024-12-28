@@ -17,19 +17,7 @@ def rename_file(instance, name_prefix, file_type, uname):
         raise ValidationError(f"Error renaming file: {str(e)}")
 
 
-class AdsForm(forms.ModelForm):
-    class Meta:
-        model = Ad
-        fields = ['title','content','image']
 
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        img = instance.image
-        if img:
-            rename_file(img, 'ads', 'ads_img', instance.title)
-        if commit:
-            instance.save()
-        return instance
         
 class MedAdviceForm(forms.ModelForm):
     class Meta:

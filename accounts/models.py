@@ -18,6 +18,14 @@ from django.utils.timezone import now
 from django.utils import timezone
 from datetime import time, timedelta
 from appointments.models import Appointment
+from django.core.mail import send_mail
+from django.conf import settings
+from django.template.loader import render_to_string
+from mailjet_rest import Client
+from notifications.signals import notify
+from django.contrib.auth import get_user_model
+
+
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -33,16 +41,18 @@ class UserType(Enum):
     ADMIN = 'administrator'
     DOCTOR = 'doctor'
     PATIENT = 'patient'
-default_img="static/images/profile_images/default.jpeg"
+
+default_img = "static/images/profile_images/default.jpeg"
 
 def generate_id(user_type):
-            prefix = USER_TYPE_PREFIX.get(user_type, '9')
-            year = str(datetime.now().year)
-            unique_part = str(uuid.uuid4().int)[:4]
-            return f"{prefix}{year}{unique_part}"
+    prefix = USER_TYPE_PREFIX.get(user_type, '9')
+    print(prefix+'---------------')
+    year = str(datetime.now().year)
+    unique_part = str(uuid.uuid4().int)[:4]
+    return f"{prefix}{year}{unique_part}"
             
             
-def rename_file(instance,file_type, id):
+def rename_file(instance, file_type, id):
     try:
         extension = instance.name.split('.')[-1]
         filename = f"{slugify(id)}_{file_type}.{extension}"
@@ -50,7 +60,7 @@ def rename_file(instance,file_type, id):
     except Exception as e:
         logger.error(f"Error renaming file for {id}: {e}")
         raise ValidationError(f"Error renaming file: {str(e)}")
-        
+
 # Custom User Manager
 class UserManager(BaseUserManager):
     def create_user(self, id, email, name, password=None, **extra_fields):
@@ -75,13 +85,13 @@ class UserManager(BaseUserManager):
 
         return self.create_user(id, email, name, password, **extra_fields)
 
-
-        
 # Helper function to delete files if they exist
 def delete_file_if_exists(file_field):
     if file_field and os.path.exists(file_field.path):
-        os.remove(file_field.path)
-
+        try:
+            os.remove(file_field.path)
+        except Exception as e:
+            logger.error(f"Error deleting file: {e}")
 
 # Password Generation Function
 def generate_secure_password(length=12):
@@ -112,7 +122,7 @@ def validate_pdf_file(value):
         raise ValidationError("Invalid file extension. Only PDF is allowed.")
     if value.size > max_size:
         raise ValidationError(f"File size should not exceed 10MB.")        
-        
+
 # Custom UserBase model
 class UserBase(AbstractBaseUser, PermissionsMixin):
     STATUS_CHOICES = [(True, 'Active'), (False, 'Inactive')]
@@ -125,7 +135,7 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
         max_length=10,
         choices=[(tag.name, tag.value) for tag in UserType],
     )
-    profile_image = models.ImageField(upload_to=f"static/images/profile_images/",default=default_img, validators=[validate_image_file])
+    profile_image = models.ImageField(upload_to=f"static/images/profile_images/", default=default_img, validators=[validate_image_file])
     id = models.CharField(max_length=9, unique=True, primary_key=True, editable=False)
     phone_number = PhoneNumberField(blank=True, null=True)
     
@@ -139,25 +149,66 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
         # Set the user_type based on the class name if not already set
         if not self.user_type:
             self.user_type = self.__class__.__name__.lower()
+            print(self.user_type)
 
         # Generate a unique ID if not already set
         if not self.id:
-            self.id=generate_id(self.user_type)
+            self.id = generate_id(self.user_type)
+        
         # Generate a secure password if none is provided
         if not self.password and self.is_active:
             genpassword = generate_secure_password()
-            mail_file_path = f"mail/{self.id}.txt"
-            with open(mail_file_path, 'w') as mail_file:
-                mail_file.write(f"Your ID is: {self.id}\nYour password is: {genpassword}")
-            self.set_password(genpassword)
+            
+            subject = f"Welcome to the Healthcare App, {self.name}"
+            message = render_to_string('mail/credentials_email.html', {
+                'name':self.name,
+                'id': self.id,
+                'password': genpassword,
+            })
+            
+            
+            if settings.USE_MAILJET:
+                # Create a Mailjet client
+                mailjet = Client(auth=(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD), version='v3.1')
 
+                data = {
+                    'Messages': [
+                        {
+                            'From': {
+                                'Email': 'baraahca2001@gmail.com',
+                                'Name': 'Healthcare App',
+                            },
+                            'To': [
+                                {
+                                    'Email': self.email,
+                                    'Name': self.name,
+                                }
+                            ],
+                            'Subject': subject,
+                            'TextPart': message,
+                            'HTMLPart': message,
+                        }
+                    ]
+                }
+
+                result = mailjet.send.create(data=data)
+                if result.status_code != 200:
+                    print('error')
+                    logger.error(f"Error sending email: {result.text}")
+            else:
+                print(f"Sending email to {self.email}:")
+                print(f"Subject: {subject}")
+                print(f"Message:\n{message}")
+
+            self.set_password(genpassword)
+        
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} - {self.specialty}" if self.is_doctor else f"Patient: {self.name}"
+        return f"{self.name}" if self.is_doctor else f"Patient: {self.name}"
 
     def delete(self, *args, **kwargs):
-        if not self.profile_image==default_img:
+        if not self.profile_image == default_img:
             delete_file_if_exists(self.profile_image)
         super().delete(*args, **kwargs)
 
@@ -173,19 +224,15 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
     def is_administrator(self):
         return self.user_type == UserType.ADMIN.value
 
-
 # Doctor-specific model
 class Doctor(UserBase):
     class Specialty(models.TextChoices):
         Dentist = 'Dentist', _('Dentist')
-
         Psychiatrist = 'Psychiatrist', _('Psychiatrist')
-
         ENT = 'ENT', _('ENT')
 
-
     license_number = models.CharField(max_length=255)
-    degree_certificate = models.FileField(upload_to='static/certificates/',validators=[validate_pdf_file], blank=True, null=True)
+    degree_certificate = models.FileField(upload_to='static/certificates/', validators=[validate_pdf_file], blank=True, null=True)
     bio = models.TextField(blank=True)
     specialty = models.CharField(max_length=50, choices=Specialty.choices)
     patients = models.ManyToManyField('Patient', through='DoctorPatient', related_name='selected_doctors')
@@ -204,24 +251,19 @@ class Doctor(UserBase):
         super().delete(*args, **kwargs)
    
     def save(self, *args, **kwargs):  
-        # Generate a unique ID if not already set
-        is_new=False
+        is_new = False
         if not self.id:
-            is_new=True
-            self.id=generate_id(self.user_type)
-                       
+            is_new = True
+            #fix here
+            self.id = generate_id(self.user_type)
+        
         if self.degree_certificate:
             rename_file(self.degree_certificate, 'degree_certificate', self.id)
             
         super().save(*args, **kwargs)
         if is_new:
             DoctorSchedule.create_default_schedule(self)
-    
-    
-# Administrator-specific model
-class Administrator(UserBase):
-    class Meta:
-        verbose_name = "Administrator"
+
 
 
 # Patient-specific model
@@ -231,7 +273,7 @@ class Patient(UserBase):
     date_of_birth = models.DateField()
     storage_limit = models.BigIntegerField(default=52428800)  # 50 MB default limit in bytes
     used_storage = models.BigIntegerField(default=0)
-    doctors= models.ManyToManyField('Doctor', through='DoctorPatient', related_name='assigned_patients')
+    doctors = models.ManyToManyField('Doctor', through='DoctorPatient', related_name='assigned_patients')
 
     class Meta:
         verbose_name = "Patient"
@@ -256,19 +298,17 @@ class Patient(UserBase):
         self.save()
  
     def save(self, *args, **kwargs):         
-        # Generate a unique ID if not already set
         if not self.id:
-            if not self.id:
-                self.id=generate_id(self.user_type)
+            self.id = generate_id(self.user_type)
         
-                
-        if self.medical_history_file :
+        if self.medical_history_file:
             rename_file(self.medical_history_file, 'medical_history_file', self.id)
 
         super().save(*args, **kwargs)
 
 # Relationship between Doctor and Patient
 class DoctorPatient(models.Model):
+    
     class Status(models.TextChoices):
         PENDING = 'Pending', _('Pending')
         ACCEPTED = 'Accepted', _('Accepted')
@@ -282,27 +322,16 @@ class DoctorPatient(models.Model):
     class Meta:
         unique_together = ('patient', 'doctor')
         
-        
     def save(self, *args, **kwargs):
-        if self.status == self.Status.ACCEPTED:
-            # Handle logic when a doctor accepts a patient
-            # Example: Send email notification to patient
-            pass
+      
         super().save(*args, **kwargs)
     
-    
     def clean(self):
-        # Ensure a patient cannot have multiple doctors with the same specialty
         if DoctorPatient.objects.filter(patient=self.patient, doctor__specialty=self.doctor.specialty, status=DoctorPatient.Status.ACCEPTED).exists():
             raise ValidationError(_('Patient already has a doctor with this specialty.'))
 
     def __str__(self):
         return f"{self.patient.name} - {self.doctor.name} ({self.status})"
-        
-from datetime import timedelta, time
-from django.utils import timezone
-from django.db import models
-from .models import Appointment  # Import your Appointment model
 
 class DoctorSchedule(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
@@ -311,10 +340,6 @@ class DoctorSchedule(models.Model):
     end_time = models.TimeField()
 
     def get_available_slots(self, date):
-        """
-        Generate available 30-minute time slots between start_time and end_time,
-        excluding already booked slots, for a specific date.
-        """
         available_slots = []
         current_time = self.start_time
 
@@ -334,35 +359,14 @@ class DoctorSchedule(models.Model):
 
     @staticmethod
     def create_default_schedule(doctor):
-        """
-        Creates a default schedule for a doctor from Monday to Friday, 9 AM to 4 PM.
-        """
         weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
         default_start_time = time(9, 0)  # 09:00 AM
         default_end_time = time(16, 0)  # 04:00 PM
 
-        schedules = [
-            DoctorSchedule(
+        for day in weekdays:
+            DoctorSchedule.objects.create(
                 doctor=doctor,
                 day_of_week=day,
                 start_time=default_start_time,
                 end_time=default_end_time
-            )
-            for day in weekdays
-        ]
-        DoctorSchedule.objects.bulk_create(schedules)
-
-    def update_schedule(self, updated_schedules):
-        """
-        Updates the doctor's schedule.
-        :param updated_schedules: A list of dictionaries containing day_of_week, start_time, and end_time.
-        """
-        for schedule in updated_schedules:
-            DoctorSchedule.objects.update_or_create(
-                doctor=self.doctor,
-                day_of_week=schedule['day_of_week'],
-                defaults={
-                    'start_time': schedule['start_time'],
-                    'end_time': schedule['end_time'],
-                }
             )

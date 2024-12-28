@@ -1,7 +1,7 @@
 from django import forms
 from .models import Doctor, Patient, UserBase
 from django import forms
-from .models import Doctor, Patient, Administrator
+from .models import Doctor, Patient
 from allauth.account.forms import SignupForm
 from phonenumber_field.formfields import PhoneNumberField
 from django.core.exceptions import ValidationError
@@ -9,6 +9,9 @@ import os
 from django.utils.text import slugify
 import logging
 import datetime
+from django import forms
+from .models import Patient
+from django.forms import DateInput
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -51,9 +54,7 @@ class DoctorSignUpForm(forms.ModelForm):
             instance.save()
         return instance
 
-from django import forms
-from .models import Patient
-from django.forms import DateInput
+
 
 class PatientSignUpForm(forms.ModelForm):
     class Meta:
@@ -83,16 +84,3 @@ class PatientSignUpForm(forms.ModelForm):
             instance.save()
         return instance
 
-class AdminSignUpForm(forms.ModelForm):
-    class Meta:
-        model = Administrator
-        fields = ['name', 'email', 'phone_number']
-  
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        instance.user_type = 'admin'
-        uname = instance.name     
-        
-        if commit:
-            instance.save()
-        return instance

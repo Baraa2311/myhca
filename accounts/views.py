@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import TemplateView
 from allauth.account.views import SignupView
-from .forms import DoctorSignUpForm, PatientSignUpForm, AdminSignUpForm
+from .forms import DoctorSignUpForm, PatientSignUpForm
 from .models import Doctor, Patient, DoctorPatient,UserBase
 from django.views.generic import DetailView, UpdateView
 from django.urls import reverse_lazy
@@ -44,18 +44,7 @@ class PatientSignUpView(SignupView):
         logger.info(f"Patient {patient.name} registered successfully.")
         return redirect('registration_pending')
 
-# Enhanced Admin Signup
-class AdminSignUpView(SignupView):
-    form_class = AdminSignUpForm
-    template_name = 'account/signup_admin.html'
 
-    def form_valid(self, form):
-        administrator = form.save(commit=False)
-        administrator.user_type = 'administrator'
-        administrator.save()
-        messages.success(self.request, 'Administrator registered successfully! Pending admin approval.')
-        logger.info(f"Administrator {administrator.name} registered successfully.")
-        return redirect('registration_pending')
 
 # Registration Pending View
 class RegistrationPendingView(TemplateView):
@@ -86,18 +75,10 @@ class PatientHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         return redirect('home')
 
 
-# Enhanced Patient Home View
-class AdminHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = 'homepages/admin_home.html'
-    login_url = 'custom_login_redirect'
 
-    def test_func(self):
-        return self.request.user.is_administrator
 
-    def handle_no_permission(self):
-        logger.warning(f"Access denied for user {self.request.user}. Not a Admin.")
-        return redirect('home')
         
+
         
 # Select Doctor View - Enhanced with Error Handling and Feedback
 @login_required
@@ -119,7 +100,7 @@ def select_doctor(request):
 
         # Create new selection
         DoctorPatient.objects.create(patient=patient, doctor=doctor, status='Pending')
-
+        
         messages.success(request, f"Doctor {doctor.name} assigned successfully.")
         logger.info(f"Patient {patient.name} selected doctor {doctor.name} successfully.")
         return JsonResponse({"message": "Doctor assigned successfully"})

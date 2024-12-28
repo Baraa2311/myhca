@@ -6,6 +6,4 @@ media/
 *.log
 node_modules/
 static/
-help.txt
-help0.txt
-help2.txt
+staticfiles/

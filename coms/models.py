@@ -1,13 +1,13 @@
 import os
 from django.db import models
 from django.contrib.auth import get_user_model
-from accounts.models import Administrator, Doctor
+from accounts.models import UserBase, Doctor
 
 class Ad(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
     image = models.ImageField(upload_to='static/images/ads/', blank=True, null=True)
-    created_by = models.ForeignKey(Administrator, on_delete=models.CASCADE, related_name='advice')
+    created_by = models.ForeignKey(UserBase, on_delete=models.CASCADE, related_name='ad')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

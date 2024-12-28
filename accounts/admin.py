@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import UserBase, Administrator, Doctor, Patient,DoctorPatient
+from .models import UserBase, Doctor, Patient,DoctorPatient
 
 
 
@@ -28,16 +28,7 @@ class UserBaseAdmin(admin.ModelAdmin):
     
 
 
-# Administrator Admin
-class AdministratorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'email', 'phone_number', 'is_active')
-    search_fields = ('name', 'id', 'email', 'phone_number')
-    ordering = ('id',)
 
-    fieldsets = (
-        (None, {'fields': ('name', 'email', 'phone_number', 'profile_image')}),
-        ('Status', {'fields': ('is_active',)}),
-    )
 
 
 # Doctor Admin
@@ -74,6 +65,5 @@ admin.site.register(DoctorPatient, DoctorPatientAdmin)
 
 # Register Models in Admin Site
 admin.site.register(UserBase, UserBaseAdmin)
-admin.site.register(Administrator, AdministratorAdmin)
 admin.site.register(Doctor, DoctorAdmin)
 admin.site.register(Patient, PatientAdmin)

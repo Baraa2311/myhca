@@ -16,7 +16,7 @@ class CustomLoginRedirectView(LoginRequiredMixin, View):
         redirect_map = {
             'patient': 'patient_home',
             'doctor': 'doctor_home',
-            'administrator': 'admin_home'
+            'administrator': 'super/'
         }
 
         # Redirect to the corresponding view based on the user type
