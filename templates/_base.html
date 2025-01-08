@@ -6,126 +6,185 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Clinic management system" />
     <meta name="author" content="Your Name" />
-    <title>{% block title %}Clinic{% endblock %}</title>
+    <title>{% block title %}Clinic Management System{% endblock %}</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon" />
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/x-icon" />
 
-    <!-- External Stylesheets (e.g., Google Fonts) -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
 
-    <!-- Main Stylesheet -->
+    <!-- Font Awesome for the Bell Icon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-
-    <!-- Additional Meta Tags for SEO -->
-    <meta name="robots" content="index, follow" />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-
-    {% block extra_head %}
-    <!-- Add custom head content for individual pages if needed -->
+    <link rel="stylesheet" href="{% static 'css/styleB.css' %}" />
+    {% block extra_styles %}
     {% endblock %}
+
+
   </head>
 
   <body>
-    <!-- Main Wrapper -->
     <div class="wrapper">
-      <!-- Header Section -->
-      <header>
-        <nav class="navbar">
-          <a class="navbar-brand" href="{% url 'home' %}">
+      <!-- Header -->
+      <header class="header">
+        <nav class="navbar container">
+          <a href="{% url 'home' %}" class="navbar-brand">
             <img src="{% static 'images/logo.png' %}" alt="Clinic Logo" class="logo" />
           </a>
 
-          <!-- Navbar Links -->
-          <div class="navbar-menu" id="navbar-menu">
+          {% if user.is_authenticated %}
+            <button id="notifications-toggle" class="notifications-btn">
+              <i class="fas fa-bell"></i>
+              {% if user.notifications.unread.count > 0 %}
+                <span class="badge">{{ user.notifications.unread.count }}</span>
+              {% endif %}
+            </button>
+
+            <div id="notifications-dropdown" class="notifications-dropdown">
+              {% for notification in user.notifications.unread %}
+                <div class="notification-item">
+                  <p>{{ notification.verb }}</p>
+                  <small>{{ notification.timesince }} ago</small>
+                </div>
+              {% empty %}
+                <p>No new notifications</p>
+              {% endfor %}
+              <a href="{% url 'notifications_read_all' %}" class="mark-all-read">Mark all as read</a>
+            </div>
+          {% endif %}
+          
+          <button class="navbar-toggler" id="navbar-toggler">
+            <span class="toggler-icon">&#9776;</span>
+          </button>
+        </nav>
+        <div class="navbar-menu" id="navbar-menu">
+          <ul class="nav-links">
             {% if user.is_authenticated %}
-            <ul class="nav-links">
-              <li><a href="{% url 'account_logout' %}" class="nav-link">Logout</a></li>
               <li><a href="{% url 'profile' %}" class="nav-link">Profile</a></li>
-            </ul>
+              <li><a href="{% url 'account_logout' %}" class="nav-link">Logout</a></li>
             {% else %}
-            <ul class="nav-links">
               <li><a href="{% url 'account_login' %}" class="nav-link">Login</a></li>
               <li><a href="{% url 'doctor_signup' %}" class="nav-link">Doctor Sign Up</a></li>
               <li><a href="{% url 'patient_signup' %}" class="nav-link">Patient Sign Up</a></li>
-            </ul>
             {% endif %}
-          </div>
-
-          <!-- Menu Button for Mobile View -->
-          <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation">&#9776;</button>
-        </nav>
-      </header>
-
-      <!-- Banner Section -->
-      {% if user.is_authenticated %}
-        <div class="ads-banner">
-          {% if user.user_type == 'doctor' %}
-            <div class="alert alert-info text-center d-flex align-items-center">
-              <img src="" alt="Doctor Tools" class="banner-image" />
-              <div class="banner-content">
-                <h5>Exclusive Tools for Doctors</h5>
-                <p>Explore the best tools and services for healthcare professionals.</p>
-              </div>
-            </div>
-          {% elif user.user_type == 'patient' %}
-            <div class="alert alert-success text-center d-flex align-items-center">
-              <img src="" alt="Health Tip" class="banner-image" />
-              <div class="banner-content">
-                <h5>Health Tip of the Day</h5>
-                <p>Stay active! Regular exercise helps maintain a healthy heart.</p>
-                <hr>
-                <h5>Recommended for You</h5>
-                <p>Find trusted clinics and pharmacies nearby.</p>
-              </div>
-            </div>
-          {% endif %}
+          </ul>
         </div>
-      {% endif %}
+      </header>
 
       <!-- Hero Section -->
       {% block hero %}
       <section class="hero">
-        <h1>Welcome to Clinic</h1>
-        <p>Your health, our priority. Find the right care today.</p>
-        <div class="hero-buttons">
-          <a href="#services" class="button">Explore Services</a>
-          <a href="#contact" class="button">Contact Us</a>
+        <div class="container">
+          {% block hero_m %}
+          <h1>Welcome to Biolink</h1>
+          <p>Your health is our priority. Join Biolink to access personalized medical services and care.</p>
+          {% endblock %}
+          {% if user.is_authenticated %}
+            <a href="{% url 'custom_login_redirect' %}" class="cta-button cta-doctor">Dashboard</a>
+          {% else %}
+            <a href="{% url 'doctor_signup' %}" class="cta-button cta-doctor">Join as Doctor</a>
+            <a href="{% url 'patient_signup' %}" class="cta-button cta-patient">Join as Patient</a>
+          {% endif %}
         </div>
       </section>
       {% endblock %}
 
-      <!-- Main Content Area -->
-      <main>
+      <!-- Main Content -->
+      <main class="main-content container">
         {% block content %}
-        <!-- Content for individual pages will be inserted here -->
         {% endblock %}
       </main>
 
-      <!-- Footer Section -->
+      <!-- Footer -->
       <footer class="footer">
-        <div class="container">
-          <p>&copy; 2024 Clinic Management System. All Rights Reserved.</p>
-          <div class="social-links">
-            <a href="https://twitter.com/yourprofile" target="_blank" aria-label="Twitter">Twitter</a>
-            <a href="https://facebook.com/yourprofile" target="_blank" aria-label="Facebook">Facebook</a>
-            <a href="https://linkedin.com/yourprofile" target="_blank" aria-label="LinkedIn">LinkedIn</a>
-          </div>
+        <div class="container footer-container">
+          <p>&copy; {% now "Y" %} Biolink. All Rights Reserved.</p>
+          <ul class="social-links">
+            <li><a href="https://twitter.com/yourprofile" target="_blank" aria-label="Twitter">Twitter</a></li>
+            <li><a href="https://facebook.com/yourprofile" target="_blank" aria-label="Facebook">Facebook</a></li>
+            <li><a href="https://linkedin.com/yourprofile" target="_blank" aria-label="LinkedIn">LinkedIn</a></li>
+          </ul>
         </div>
       </footer>
     </div>
 
-    <!-- Inline JavaScript for Menu Toggle -->
-    <script>
-      const menuToggle = document.getElementById("menu-toggle");
-      const navbarMenu = document.getElementById("navbar-menu");
+    <!-- Popup Structure -->
+    <div class="popup-overlay" id="popup-overlay">
+      <div class="popup-content">
+        <button class="popup-close" id="popup-close">&times;</button>
+        <img id="popup-image" alt="Popup Content">
+        <h4 id="popup-title"></h4>
+        <p id="popup-text"></p>
+      </div>
+    </div>
 
-      menuToggle.addEventListener("click", function () {
-        navbarMenu.classList.toggle("show");
+    <!-- JavaScript -->
+    <script>
+      // Navbar and notifications toggle functionality
+      const toggler = document.getElementById("navbar-toggler");
+      const menu = document.getElementById("navbar-menu");
+      const notificationsToggle = document.getElementById("notifications-toggle");
+      const notificationsDropdown = document.getElementById("notifications-dropdown");
+
+      toggler.addEventListener("click", () => {
+        menu.classList.toggle("active");
+      });
+
+      notificationsToggle.addEventListener("click", () => {
+        notificationsDropdown.classList.toggle("active");
       });
     </script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const popupOverlay = document.getElementById('popup-overlay');
+    const popupClose = document.getElementById('popup-close');
+    const popupImage = document.getElementById('popup-image');
+    const popupTitle = document.getElementById('popup-title');
+    const popupText = document.getElementById('popup-text');
 
-    <!-- Additional JavaScript if needed -->
+    async function fetchData() {
+      try {
+        const response = await fetch('/get_data/');
+        const data = await response.json();
+        const ads = data.ads;
+        const medicalAdvice = data.medical_advice;
+        showRandomPopup(ads, medicalAdvice);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    function showRandomPopup(ads, medicalAdvice) {
+      const combined = [...ads, ...medicalAdvice];
+      if (combined.length === 0) return;
+
+      const randomItem = combined[Math.floor(Math.random() * combined.length)];
+
+      popupImage.style.display = randomItem.image ? 'block' : 'none';
+
+      if (randomItem.image) {
+        // Ensure the randomItem.image is just the image URL and not a full link to a site
+        const imageUrl = new URL(randomItem.image, window.location.origin).href;
+        popupImage.src = imageUrl;
+        
+      }
+
+      popupTitle.textContent = randomItem.title || 'No Title';
+      popupText.textContent = randomItem.content || randomItem.advice || 'No Content';
+
+      popupOverlay.style.display = 'flex';
+    }
+
+    popupClose.addEventListener('click', () => {
+      popupOverlay.style.display = 'none';
+    });
+
+    setInterval(fetchData, 20000); // Fetch and show a popup every 5 seconds
+  });
+</script>
     {% block extra_js %}
     {% endblock %}
   </body>

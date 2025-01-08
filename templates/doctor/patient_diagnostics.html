@@ -1,40 +1,54 @@
-{% extends '../_base.html' %}
-
+{% extends '../homepages/doctor_home.html' %}
+{% load static %}
 {% block title %}Diagnostics{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
 
 {% block content %}
-    <h2 class="my-4">Diagnostics</h2>
+<h2 class="my-4 diagnostic-page-title">Diagnostics</h2>
 
-    <div class="row">
-        <div class="col-6">
-            <div class="card">
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for diagnostic in diagnosis %}
-                            <li class="list-group-item">
-                                <h4>Test</h4>
-                                <p>{{ diagnostic.test_name }}</p>
-                                <h4>Result</h4>
-                                <p>{{ diagnostic.test_results }}</p>
+<div class="row diagnostic-list-container">
+    <div class="col-12 col-md-6">
+        <div class="card diagnostic-card">
+            <div class="card-body">
+                <ul class="list-group diagnostic-list">
+                    {% for diagnostic in diagnosis %}
+                        <li class="list-group-item diagnostic-item">
+                            <div class="diagnostic-item-header">
+                                <h4 class="diagnostic-test-name">Test Name: <span>{{ diagnostic.test_name }}</span></h4>
+                            </div>
+                            <div class="diagnostic-item-body">
+                                <div class="diagnostic-details">
+                                    <h5 class="diagnostic-heading">Test Results:</h5>
+                                    <p>{{ diagnostic.test_results }}</p>
+                                </div>
 
                                 {% if request.user.user_type == 'doctor' %}
-                                    <a href="{% url 'diagnostic_update' diagnostic.id %}" class="btn btn-sm btn-primary float-end ml-2">Edit</a>
-                                    <a href="{% url 'diagnostic_delete' diagnostic.id %}" class="btn btn-sm btn-primary float-end ml-2">Delete</a>
+                                    <div class="diagnostic-actions">
+                                        <a href="{% url 'diagnostic_update' diagnostic.id %}" class="btn btn-sm btn-outline-primary btn-edit">Edit</a>
+                                        <a href="{% url 'diagnostic_delete' diagnostic.id %}" class="btn btn-sm btn-outline-danger btn-delete">Delete</a>
+                                    </div>
                                 {% elif request.user.user_type == 'patient' %}
-                                    <h4>Doctor</h4>
-                                    <p>{{ diagnostic.doctor }}</p>
+                                    <div class="doctor-info">
+                                        <h5 class="doctor-info-heading">Diagnosed By:</h5>
+                                        <p>{{ diagnostic.doctor.name }}</p>
+                                    </div>
                                 {% endif %}
-                            </li>
-                        {% empty %}
-                            <li>No Diagnostics available</li>
-                        {% endfor %}
-                    </ul>
-                    
-                    {% if request.user.user_type == 'doctor' %}
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="no-diagnostics">No Diagnostics available</li>
+                    {% endfor %}
+                </ul>
+
+                {% if request.user.user_type == 'doctor' %}
+                    <div class="add-diagnostic-btn-container">
                         <a href="{% url 'diagnostic_create' patient_id %}" class="btn btn-primary mt-3">Add New Diagnostic</a>
-                    {% endif %}
-                </div>
+                    </div>
+                {% endif %}
             </div>
-        </div>   
+        </div>
     </div>
+</div>
 {% endblock %}

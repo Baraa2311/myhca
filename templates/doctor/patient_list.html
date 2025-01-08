@@ -1,8 +1,12 @@
-{% extends '../_base.html' %}
-
-{% block title %}Users{% endblock %}
+{% extends '../homepages/doctor_home.html' %}
+{% load static %}
+{% block title %}Patients{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
 
 {% block content %}
+<div class="patients-page">
     <h2 class="my-4">Patients</h2>
 
     <div class="row">  
@@ -13,17 +17,18 @@
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
-                       {% for patient in patients %}
-                         <li class="list-group-item">
-                {{ patient.name }} - {{ patient.email }}
-        <a href="{% url 'patient_details' patient.pk %}" class="btn btn-sm btn-primary float-end ml-2">Details</a>
-    </li>
-{% empty %}
-    <li>No patients available</li>
-{% endfor %}
+                        {% for patient in patients %}
+                            <li class="list-group-item">
+                                {{ patient.name }} - {{ patient.email }}
+                                <a href="{% url 'patient_details' patient.pk %}" class="btn btn-sm btn-primary float-end ml-2">Details</a>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">No patients available</li>
+                        {% endfor %}
                     </ul>                
                 </div>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

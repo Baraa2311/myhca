@@ -1,12 +1,21 @@
 {% extends '../_base.html' %}
+{% load static %}
+{% block title %}Doctor{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/patient_style.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="doctor-details">
-    <img src="{{ doctor.profile_image.url }}" alt="{{ doctor.name }}" class="profile-img">
-    <h2>Dr. {{ doctor.name }}</h2>
-    <p><strong>Specialty:</strong> {{ doctor.specialty }}</p>
-    <p>{{ doctor.bio }}</p>
-    <p><strong>Contact:</strong> {{ doctor.email }}</p>
-    <button class="button back-button" onclick="history.back()">Back</button>
+<div class="doctor-details" id="doctor-details">
+    <div class="profile-container">
+        <img src="{{ doctor.profile_image.url }}" alt="{{ doctor.name }}" class="profile-img" id="profile-img">
+        <div class="doctor-info" id="doctor-info">
+            <h2 id="doctor-name">Dr. {{ doctor.name }}</h2>
+            <p><strong>Specialty:</strong> <span id="doctor-specialty">{{ doctor.specialty }}</span></p>
+            <p id="doctor-bio">{{ doctor.bio }}</p>
+            <p><strong>Contact:</strong> <span id="doctor-email">{{ doctor.email }}</span></p>
+        </div>
+    </div>
+    <button class="button back-button" id="back-button" onclick="history.back()">Back</button>
 </div>
 {% endblock %}

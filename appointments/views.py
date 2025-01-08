@@ -7,6 +7,24 @@ from .models import Appointment
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from notifications.signals import notify
+from django.views.generic import ListView
+
+class DoctorAppointmentsView(ListView):
+    model = Appointment
+    template_name = 'appointments/doctor_appointments.html'
+    context_object_name = 'appointments'
+
+    def get_queryset(self):
+        doctor_id = self.kwargs['doctor_id']
+        return Appointment.objects.filter(doctor__id=doctor_id).order_by('date', 'time')
+
+def send_notification(sender,receiver, message):
+       notify.send(
+        sender,  # sender
+        recipient=receiver,  # recipient
+        verb=message,  # message
+    ) 
 
 @csrf_exempt
 def delete_appointment(request):
@@ -95,7 +113,9 @@ def book_appointment(request):
                 time=appointment_time,
                 patient=patient
             )
-
+            send_notification(patient,doctor,f"you have an appointment with patient {patient.name} at {appointment_date} , {appointment_time}")
+            print(f"dr {doctor} you have an appointment with patient {patient.name} at {appointment_date} , {appointment_time}"
+)
             return JsonResponse({
                 'message': 'Appointment booked successfully!',
                 'appointment': {

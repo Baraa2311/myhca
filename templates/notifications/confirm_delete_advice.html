@@ -1,24 +1,29 @@
-{% extends '../_base.html' %}
+{% extends '../homepages/doctor_home.html' %}
+
 {% load static %}
 {% block title %}Delete Medical Advice{% endblock %}
 
 {% block content %}
-  <div class="container my-5">
-    <h2 class="text-center mb-4">Are you sure you want to delete this Medical Advice?</h2>
-    <div class="card shadow-lg">
-      {% if object.image %}
-        <img src="{% static object.image.url %}" alt="{{ object.title }}" class="card-img-top" style="height: 200px; object-fit: cover;">
-      {% else %}
-        <img src="{% static 'images/default_advice_image.jpg' %}" alt="Default Advice Image" class="card-img-top" style="height: 200px; object-fit: cover;">
-      {% endif %}
+  <div class="container my-5 doctor-delete-advice-container">
+    <h2 class="text-center mb-4 doctor-delete-advice-title">Are you sure you want to delete this Medical Advice?</h2>
+
+    <div class="card doctor-delete-advice-card shadow-lg">
       <div class="card-body">
-        <h5 class="card-title">{{ object.title }}</h5>
-        <p class="card-text">{{ object.advice }}</p>
-        <p class="text-muted small">By Dr. {{ object.created_by.name }} on {{ object.created_at|date:"F j, Y" }}</p>
-        <form method="post">
+        {% if object.image %}
+          <img src="{{ object.image.url }}"  alt="{{ object.title }}" class="card-img-top doctor-delete-advice-img img-fluid">
+        {% else %}
+          <img src="{% static 'images/default_advice_image.jpg' %}" alt="Default Advice Image" class="card-img-top doctor-delete-advice-img img-fluid">
+        {% endif %}
+        <h5 class="card-title doctor-delete-advice-title">{{ object.title }}</h5>
+        <p class="card-text doctor-delete-advice-text">{{ object.advice }}</p>
+        <p class="text-muted small doctor-delete-advice-meta">By Dr. {{ object.created_by.name }} on {{ object.created_at|date:"F j, Y" }}</p>
+        
+        <form method="post" class="doctor-delete-advice-form">
           {% csrf_token %}
-          <button type="submit" class="btn btn-danger">Delete</button>
-          <a href="{% url 'advice_list' %}" class="btn btn-secondary">Cancel</a>
+          <div class="form-group">
+            <button type="submit" class="btn doctor-delete-advice-btn w-100">Delete</button>
+          </div>
+          <a href="{% url 'advice_list' %}" class="btn btn-secondary doctor-delete-advice-cancel-btn w-100">Cancel</a>
         </form>
       </div>
     </div>

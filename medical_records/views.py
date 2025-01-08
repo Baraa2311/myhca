@@ -9,18 +9,19 @@ from accounts.models import Patient
 from django.core.exceptions import ValidationError
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-
-class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    template_name = 'patient/upload_medical_files.html'
-    form_class = MedicalFileUploadForm
-    success_url = reverse_lazy('view_medical_files')  # Use reverse_lazy to dynamically resolve the URL
-
+class PatientMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_patient
 
     def handle_no_permission(self):
         logger.warning(f"Access denied for user {self.request.user}. Not a patient.")
         return redirect('home')
+        
+class UploadFileView(LoginRequiredMixin, PatientMixin, CreateView):
+    template_name = 'patient/upload_medical_files.html'
+    form_class = MedicalFileUploadForm
+    success_url = reverse_lazy('view_medical_files')  # Use reverse_lazy to dynamically resolve the URL
+
         
     def form_valid(self, form):
         medical_file = form.save(commit=False)
@@ -36,16 +37,9 @@ class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return redirect(self.success_url)
 
 
-class ShowFilesView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class ShowFilesView(LoginRequiredMixin, PatientMixin, ListView):
     template_name = 'patient/view_medical_files.html'
     context_object_name = 'files'
-
-    def test_func(self):
-        return self.request.user.is_patient
-
-    def handle_no_permission(self):
-        logger.warning(f"Access denied for user {self.request.user}. Not a patient.")
-        return redirect('home')
         
     def get_queryset(self):
         # Ensure that we're only retrieving the files for the current authenticated user

@@ -2,51 +2,51 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
-import os
 
-# Load environment variables from a .env file (for local development)
+SITE_ID = 1
+
+# Load environment variables from a .env file
 load_dotenv()
 
-MAILJET_API_KEY = os.getenv('MAILJET_API_KEY')
-MAILJET_API_SECRET = os.getenv('MAILJET_API_SECRET')
+# Base Directory
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-USE_MAILJET = os.getenv('USE_MAILJET', 'False') == 'True'
+# Environment Variables
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')  # Secret Key
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+LOG = os.getenv('LOG', 'False') == 'True'
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'production')
 
+
+# settings.py
+STRIPE_TEST_PUBLIC_KEY = os.getenv('STRIPE_TEST_PUBLIC_KEY')
+STRIPE_TEST_SECRET_KEY = os.getenv('STRIPE_TEST_SECRET_KEY')
+
+# Allowed Hosts
+ALLOWED_HOSTS = ['hca.up.railway.app', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://hca.up.railway.app']
+
+# Email Configuration
+USE_MAILJET = os.getenv('MAILJET_ON', 'False') == 'True'
 print(USE_MAILJET)
+
+DEFAULT_FROM_EMAIL = "admin@djangobookstore.com"
 
 if USE_MAILJET:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'in-v3.mailjet.com'
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = MAILJET_API_KEY  # Use the Mailjet API key as the username
-    EMAIL_HOST_PASSWORD = MAILJET_API_SECRET  # Use the Mailjet API secret as the password
+    EMAIL_HOST_USER = os.getenv('MAILJET_API_KEY')
+    EMAIL_HOST_PASSWORD = os.getenv('MAILJET_API_SECRET')
 else:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # This will print the email to the console
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-
-
-
-
-ENVIRONMENT = 'production'  # Should be set based on your environment (production or local)
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')  # Ensure you have the correct key in your .env
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
-LOG = os.getenv('LOG', 'False') == 'True'
-
-# Allowed hosts for deployment (can add multiple)
-ALLOWED_HOSTS = ['ALLOWED_HOSTS', 'hca.up.railway.app','localhost','127.0.0.1']
-
-CSRF_TRUSTED_ORIGINS=['https://https://hca.up.railway.app/']
-
-# Application definition
 INSTALLED_APPS = [
+    'jazzmin', 
+
+    'notifications',
+    # Local Apps
     'accounts.apps.AccountsConfig',
     'clinic.apps.ClinicConfig',
     'medical_records.apps.MedicalRecordsConfig',
@@ -54,38 +54,35 @@ INSTALLED_APPS = [
     'appointments.apps.AppointmentsConfig',
     'doctor_panel.apps.DoctorPanelConfig',
     'diagnostics_and_prescriptions.apps.DiagnosticsAndPrescriptionsConfig',
-
+    'payments.apps.PaymentsConfig',
+    # Third-Party Apps
     'phonenumber_field',
     'django.contrib.sites',
     'allauth',
     'allauth.account',
     'crispy_forms',
+    'storages',   
+    # Django Built-in Apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    'storages',
- 
-    ]
+]
 
-CRISPY_TEMPLATE_PACK = 'bootstrap'
+JAZZMIN_SETTINGS = {
+    "site_title": "Biolink Admin",
+    "site_header": "Biolink Admin Panel",
+    "site_brand": "Biolink",
+    "welcome_sign": "Welcome to the Biolink Admin Panel!",
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "custom_css": None,
+    "custom_js": None,
+}
 
-# Set the LOGIN_REDIRECT_URL for post-login redirection
-LOGOUT_REDIRECT_URL = "home"
-SITE_ID = 1
-
-AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
-)
-
-
-
-ACCOUNT_SESSION_REMEMBER = True  # Enable session remember
-
+# Middleware
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -99,8 +96,17 @@ MIDDLEWARE = [
     'django.middleware.common.BrokenLinkEmailsMiddleware',
 ]
 
-ROOT_URLCONF = 'h.urls'
+# Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
 
+# URL Configuration
+ROOT_URLCONF = 'h.urls'
+WSGI_APPLICATION = 'h.wsgi.application'
+
+# Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -112,55 +118,72 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Add your custom context processor
+                'h.context_processors.common_data',
             ],
         },
     },
 ]
 
-
-
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Path for collected static files
-
-# Determine if the app is in production or development
-ENVIRONMENT=os.getenv('ENVIRONMENT')
+# Databases
 if ENVIRONMENT == 'production':
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,  # Optional, sets the maximum connection lifetime in seconds
-            ssl_require=True,  # Optional, enables SSL connection if required
+            conn_max_age=600,
+            ssl_require=True,
         )
     }
-else:  # Development
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'local_db_name'),  # Replace with your local database name
-            'USER': os.getenv('DB_USER', 'local_user'),  # Replace with your local database user
-            'PASSWORD': os.getenv('DB_PASSWORD', 'local_password'),  # Replace with your local database password
-            'HOST': os.getenv('DB_HOST', 'localhost'),  # Local database host
-            'PORT': os.getenv('DB_PORT', '5432'),  # Local database port
+            'NAME': os.getenv('DB_NAME', 'local_db_name'),
+            'USER': os.getenv('DB_USER', 'local_user'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'local_password'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
         }
     }
 
 
+USE_AWS = os.getenv('AWS3_ON', 'False') == 'True'
+print(USE_AWS)
 
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+
+if USE_AWS:
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+    AWS_QUERYSTRING_AUTH = False  # Disables querystring in URLs
+
+    # S3 Static and Media Files Storage
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    # Static and Media URLs
+    STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
+    STATICC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
+    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
+
+    # STATIC_ROOT is not needed for AWS
+    STATIC_ROOT = None
+else:
+    # Local Development Setup
+    STATIC_URL = 'static/'
+    STATICC_URL = 'static/'
+    STATICFILES_DIRS = [BASE_DIR / "static"]
+
+    # Set the STATIC_ROOT for local development (this will be used by `collectstatic`)
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+
+    # Static files storage with WhiteNoise for Heroku
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Crispy Forms
+CRISPY_TEMPLATE_PACK = 'bootstrap'
+print(STATIC_URL)
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -168,73 +191,33 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-
-
-# Custom user model
-AUTH_USER_MODEL = 'accounts.UserBase'
-
-USE_AWS3 = os.getenv('USE_AWS3', 'False') == 'True'
-
-
-if USE_AWS3:
-    # AWS Credentials
-    AWS_ACCESS_KEY_ID =     os.getenv('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', default='us-east-1')  # Specify your region
-    AWS_QUERYSTRING_AUTH = False  # Makes files publicly accessible via a URL
-    # Storage settings
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'  # Media files
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'   # Static files
-
-    # Static and media URLs
-    STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
-    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
-else:
-    # Static files (CSS, JavaScript, Images)
-    STATIC_URL = 'static/'
-
-    STATICFILES_DIRS = [BASE_DIR / "static"] 
-
-    # Static files storage with WhiteNoise for Heroku
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-    
-
-
-
-# Default primary key field type
+# Default Primary Key Field Type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Allauth URL settings
+# Authentication Settings
+AUTH_USER_MODEL = 'accounts.UserBase'
 LOGIN_URL = 'account:login'
 LOGOUT_URL = 'account:logout'
-
-# The `django-allauth` adapters for customization
+LOGIN_REDIRECT_URL = 'custom_login_redirect'
+LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'id'
+ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'
 ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
 
+# Password Validation
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
 
-
-
-# Don't require username, use id instead
-ACCOUNT_USERNAME_REQUIRED = False
-
-# Ensure email is required
-ACCOUNT_EMAIL_REQUIRED = True
-
-# Log in the user after email confirmation
-ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
-
-# Redirect after logout
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-
-# The `django-allauth` settings for authenticated user redirection
-ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  # Redirect to home after login
-
-# Ensure username is not required (use email for login)
-ACCOUNT_USER_MODEL_USERNAME_FIELD = 'id'
+# Logging
 if LOG:
-
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': False,
@@ -257,5 +240,3 @@ if LOG:
             },
         },
     }
-
-WSGI_APPLICATION = 'h.wsgi.application'

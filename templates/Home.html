@@ -1,66 +1,28 @@
-{% extends '_base.html' %} 
-{% block title %}Home{% endblock %} 
+{% extends '_base.html' %}
 
-{% block hero %}
-<!-- Custom Hero Section for Home -->
-<section class="hero" style="background-color: #007bff; padding: 80px 20px; text-align: center; color: white;">
-  <div class="hero-content">
-    <h1>Welcome to Our Clinic</h1>
-    <p>Your health, our priority. Book appointments, consult with doctors, and manage your health records with ease.</p>
-    <div class="hero-buttons">
-      {% if user.is_authenticated %}
-      <a href="{% url 'custom_login_redirect' %}" class="button primary">Dashboard</a>
-      {% else %}
-      <a href="{% url 'doctor_signup' %}" class="button primary">Join as Doctor</a>
-      <a href="{% url 'patient_signup' %}" class="button secondary">Join as Patient</a>
-      {% endif %}
-    </div>
-  </div>
-</section>
-{% endblock %}
+{% block title %}Home - Clinic Management System{% endblock %}
+
+
 
 {% block content %}
-<!-- Services Section -->
-<section class="services" style="background-color: #f4f7fa; padding: 60px 20px;">
-  <h2 class="section-title">Our Services</h2>
-  <div class="service-cards" style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
-    <div class="service-card" style="flex: 1 1 30%; background: white; padding: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-      <h3>Doctor Consultations</h3>
-      <p>Book appointments with experienced doctors across various specializations.</p>
+<section class="features">
+  <div class="container">
+    <h2>Our Services</h2>
+    <div class="feature-cards">
+      <!-- Service Cards -->
+      <div class="card">
+        <h3>Appointments</h3>
+        <p>Book your appointments easily online.</p>
+      </div>
+      <div class="card">
+        <h3>Medical Advice</h3>
+        <p>Get trusted medical advice from professionals.</p>
+      </div>
+      <div class="card">
+        <h3>Doctor Consultation</h3>
+        <p>Consult with doctors remotely or in person.</p>
+      </div>
     </div>
-    <div class="service-card" style="flex: 1 1 30%; background: white; padding: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-      <h3>Prescription Management</h3>
-      <p>View and manage your prescriptions digitally anytime, anywhere.</p>
-    </div>
-    <div class="service-card" style="flex: 1 1 30%; background: white; padding: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-      <h3>Health Records</h3>
-      <p>Access and track your medical history securely in one place.</p>
-    </div>
-  </div>
-</section>
-
-<!-- Testimonials Section -->
-<section class="testimonials" style="background-color: #ffffff; padding: 60px 20px;">
-  <h2 class="section-title">What Our Patients Say</h2>
-  <div class="testimonials-container" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
-    <div class="testimonial-card" style="flex: 1 1 45%; background: #f4f7fa; padding: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-      <p>"The doctors here are so helpful and knowledgeable. I felt at ease during my consultation!"</p>
-      <h4>- Sarah L.</h4>
-    </div>
-    <div class="testimonial-card" style="flex: 1 1 45%; background: #f4f7fa; padding: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-      <p>"Managing my health records digitally has been a lifesaver. Highly recommend this system!"</p>
-      <h4>- John D.</h4>
-    </div>
-  </div>
-</section>
-
-<!-- Contact Section -->
-<section class="contact" style="background-color: #f4f7fa; padding: 60px 20px;">
-  <h2 class="section-title">Contact Us</h2>
-  <p style="text-align: center;">Have questions? Reach out to us today!</p>
-  <div class="contact-buttons" style="text-align: center;">
-    <p>Phone: <a href="tel:+1234567890" class="contact-link">+1234567890</a></p>
-    <p>Email: <a href="mailto:info@clinic.com" class="contact-link">info@clinic.com</a></p>
   </div>
 </section>
 {% endblock %}

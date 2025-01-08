@@ -1,0 +1,41 @@
+{% extends "../_base.html" %}
+{% load static %}
+{% block title %}Change Plan{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/change_plan.css' %}">
+{% endblock %}
+{% block content %}
+<div class="text-center mb-5">
+    <h1>My Plan</h1>
+    {% if current_plan %}
+    <p>Your current plan is <strong>{{ current_plan.name }}</strong></p>
+    <p>Price: ${{ current_plan.price }}</p>
+    <p>Data Limit: {{ current_plan.data_limit }} {{ current_plan.data_type }}</p>
+    <p>Duration: {{ current_plan.duration }} {{ current_plan.duration_type }}s</p>
+    {% else %}
+    <p>You currently do not have a plan.</p>
+    {% endif %}
+    <hr>
+    <h2>Other Available Plans</h2>
+</div>
+
+<div class="row text-center">
+    {% for plan in plans %}
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header {% if plan.name == 'Free' %}bg-primary{% elif plan.name == 'Standard' %}bg-success{% else %}bg-dark{% endif %} text-white">
+                <h4>{{ plan.name }}</h4>
+            </div>
+            <div class="card-body">
+                <h2 class="card-title">${{ plan.price }}</h2>
+                <p>{{ plan.name }} features</p>
+                <p><strong>{{ plan.data_limit }} {{ plan.data_type }} storage</strong></p>
+                <p>Duration: {{ plan.duration }} {{ plan.duration_type }}s</p>
+               
+                <a href="{% url 'switch_plan' plan.id %}" class="btn btn-outline-primary">Switch to {{ plan.name }}</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

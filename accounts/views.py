@@ -14,6 +14,45 @@ from django.core.exceptions import ValidationError
 from appointments.models import Appointment
 from datetime import datetime
 from django.db.models import Q
+from notifications.signals import notify
+from django.shortcuts import redirect
+from django.views import View
+from notifications.models import Notification
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+class DoctorMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_doctor
+
+    def handle_no_permission(self):
+        logger.warning(f"Access denied for user {self.request.user}. Not a doctor.")
+        return redirect('home')
+    
+class PatientMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_patient
+
+    def handle_no_permission(self):
+        logger.warning(f"Access denied for user {self.request.user}. Not a patient.")
+        return redirect('home')
+    
+
+
+class MarkAllNotificationsReadView(View):
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            # Mark all unread notifications as read for the authenticated user
+            Notification.objects.filter(recipient=request.user, unread=True).update(unread=False)
+        return redirect('home')  # Or redirect to any other page, like the profile page
+
+def send_notification(sender,receiver, message):
+     notify.send(
+        sender,  # sender
+        recipient=receiver,  # recipient
+        verb=message,  # message
+    ) 
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -27,7 +66,7 @@ class DoctorSignUpView(SignupView):
         doctor = form.save(commit=False)
         doctor.user_type = 'doctor'
         doctor.save()
-        messages.success(self.request, 'Doctor registered successfully! Pending admin approval.')
+        
         logger.info(f"Doctor {doctor.name} registered successfully.")
         return redirect('registration_pending')
 
@@ -40,7 +79,7 @@ class PatientSignUpView(SignupView):
         patient = form.save(commit=False)
         patient.user_type = 'patient'
         patient.save()
-        messages.success(self.request, 'Patient registered successfully! Pending admin approval.')
+        
         logger.info(f"Patient {patient.name} registered successfully.")
         return redirect('registration_pending')
 
@@ -52,29 +91,14 @@ class RegistrationPendingView(TemplateView):
 
 
 # Enhanced Doctor Home View
-class DoctorHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+class DoctorHomeView(LoginRequiredMixin, DoctorMixin, TemplateView):
     template_name = 'homepages/doctor_home.html'
 
-    def test_func(self):
-        return self.request.user.is_doctor
-
-    def handle_no_permission(self):
-        logger.warning(f"Access denied for user {self.request.user}. Not a doctor.")
-        return redirect('home')
 
 # Enhanced Patient Home View
-class PatientHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+class PatientHomeView(LoginRequiredMixin, PatientMixin, TemplateView):
     template_name = 'homepages/patient_home.html'
     login_url = 'custom_login_redirect'
-
-    def test_func(self):
-        return self.request.user.is_patient
-
-    def handle_no_permission(self):
-        logger.warning(f"Access denied for user {self.request.user}. Not a patient.")
-        return redirect('home')
-
-
 
 
         
@@ -91,15 +115,26 @@ def select_doctor(request):
         # Ensure doctor exists
         doctor = get_object_or_404(Doctor, id=doctor_id)
         
+        
 
 
         # Ensure the user can only have one doctor per specialty
-        existing_selection = DoctorPatient.objects.filter(patient=patient, doctor__specialty=specialty)
-        if existing_selection.exists():
+        print("gg")
+        # Check if the DoctorPatient relationship exists
+        existing_selection = DoctorPatient.objects.            filter(patient=patient, doctor__specialty=specialty).first()
+
+        if existing_selection:
+            print(existing_selection)
+            # Send notification
+            send_notification(existing_selection.patient, existing_selection.doctor, f"Patient {existing_selection.patient.name} has left your patient list")
+            # Delete the record
             existing_selection.delete()
+        else:
+            print("No such relationship exists.")
 
         # Create new selection
         DoctorPatient.objects.create(patient=patient, doctor=doctor, status='Pending')
+        send_notification(patient,doctor,f"Patient {patient.name} has requested your services")
         
         messages.success(request, f"Doctor {doctor.name} assigned successfully.")
         logger.info(f"Patient {patient.name} selected doctor {doctor.name} successfully.")
@@ -196,8 +231,10 @@ def doctor_requests(request):
 
         if action == 'accept':
             relationship.status = 'Accepted'
+            send_notification(relationship.doctor,relationship.patient,f"Doctor {relationship.doctor.name} has accepted you as his patient")
             messages.success(request, f"Accepted request from {relationship.patient.name}.")
         elif action == 'reject':
+            send_notification(relationship.doctor,relationship.patient,f"Doctor {relationship.doctor.name} has rejected you as his patient")
             relationship.status = 'Rejected'
             messages.success(request, f"Rejected request from {relationship.patient.name}.")
         relationship.save()
@@ -206,13 +243,42 @@ def doctor_requests(request):
     return render(request, "doctor/requests.html", {"pending_requests": pending_requests})
 
 
+
+
 @login_required
-def delete_doctor(request, doctor_id):
-    patient = get_object_or_404(Patient, id=request.user.id)
-    relationship = get_object_or_404(DoctorPatient, patient=patient, doctor_id=doctor_id)
+def delete_doctor(request):
+       
+    if request.method == "DELETE":
+        try:
+            data = json.loads(request.body)
+            doc_Id = data.get("doctor_id")
+            if not doc_Id:
+                return JsonResponse({"error": "Invalid Doctor ID"}, status=400)
+            patient = get_object_or_404(Patient, id=request.user.id)
+            doctor = get_object_or_404(Doctor, id=doc_Id)
+    
+            # Make sure the relationship exists before attempting to delete
+            try:
+                relationship = DoctorPatient.objects.get(patient=patient, doctor=doctor)
+            except DoctorPatient.DoesNotExist:
+                return JsonResponse({"error": "Relationship not found"}, status=404)
+
+         
+            
+            relationship.delete()
+            return JsonResponse({"message": "Doctor deleted successfully!"})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+        
+          
+            
+                
     relationship.delete()
-    messages.success(request, "Doctor removed successfully.")
-    return redirect("select_doctor")
+    send_notification(patient, doctor, f"Patient {patient.name} has left your patient list")
+    
+    # Respond with JSON to confirm deletion
+    return JsonResponse({"success": "Doctor removed successfully."}, status=200)
 
 
 @login_required

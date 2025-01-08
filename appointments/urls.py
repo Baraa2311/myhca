@@ -1,11 +1,10 @@
 from django.urls import path
 from . import views
-
-
-
+from django.urls import path
+from .views import DoctorAppointmentsView
 
 urlpatterns = [
-    # Other paths...
+    path('appointments/doctor/<int:doctor_id>/', DoctorAppointmentsView.as_view(), name='doctor_appointments'),
     path("delete_appointment/", views.delete_appointment, name="delete_appointment"),
 
     # Other paths

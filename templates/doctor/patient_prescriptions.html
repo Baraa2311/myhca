@@ -1,42 +1,62 @@
-{% extends '../_base.html' %}
-
+{% extends '../homepages/doctor_home.html' %}
+{% load static %}
 {% block title %}Prescriptions{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
 
 {% block content %}
-    <h2 class="my-4">Prescriptions</h2>
+<div class="prescription-page">
+    <h2 class="prescription-page-title my-4">Prescriptions</h2>
 
-    <div class="row">
-        <div class="col-6">
-            <div class="card">
+    <div class="prescription-list-container row">
+        <div class="col-12 col-md-8 offset-md-2">
+            <div class="prescription-card card">
                 <div class="card-body">
-                    <ul class="list-group">
-                        {% for prescription in prescriptions %}
-                            <li class="list-group-item">
-                                <h4>Medication Name</h4>
-                                <p>{{ prescription.medication_name }}</p>
-                                <h4>Dosage</h4>
-                                <p>{{ prescription.dosage }}</p>
-                                <h4>Instructions</h4>
-                                <p>{{ prescription.instructions }}</p>
-                                
-                                {% if request.user.user_type == 'doctor' %}
-                                    <a href="{% url 'prescription_update' prescription.id %}" class="btn btn-sm btn-primary float-end ml-2">Edit</a>
-                                    <a href="{% url 'prescription_delete' prescription.id %}" class="btn btn-sm btn-primary float-end ml-2">Delete</a>
-                                {% elif request.user.user_type == 'patient' %}
-                                    <h4>Prescribed By</h4>
-                                    <p>{{ prescription.doctor }}</p>
-                                {% endif %}
-                            </li>
-                        {% empty %}
-                            <li>No Prescriptions available</li>
-                        {% endfor %}
-                    </ul>
-                    
+                    {% if prescriptions %}
+                        <ul class="prescription-list">
+                            {% for prescription in prescriptions %}
+                                <li class="prescription-item">
+                                    <div class="prescription-item-header">
+                                        <h4 class="prescription-medication-name">Medication: <span>{{ prescription.medication_name }}</span></h4>
+                                    </div>
+                                    <div class="prescription-item-body">
+                                        <div class="prescription-details">
+                                            <h5 class="prescription-heading">Dosage:</h5>
+                                            <p>{{ prescription.dosage }}</p>
+                                        </div>
+                                        <div class="prescription-details">
+                                            <h5 class="prescription-heading">Instructions:</h5>
+                                            <p>{{ prescription.instructions }}</p>
+                                        </div>
+                                    </div>
+
+                                    {% if request.user.user_type == 'doctor' %}
+                                        <div class="prescription-actions">
+                                            <a href="{% url 'prescription_update' prescription.id %}" class="btn btn-sm btn-edit">Edit</a>
+                                            <a href="{% url 'prescription_delete' prescription.id %}" class="btn btn-sm btn-delete">Delete</a>
+                                        </div>
+                                    {% elif request.user.user_type == 'patient' %}
+                                        <div class="doctor-info">
+                                            <h5 class="doctor-info-heading">Prescribed By:</h5>
+                                            <p>{{ prescription.doctor }}</p>
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-prescriptions">No prescriptions available.</p>
+                    {% endif %}
+
                     {% if request.user.user_type == 'doctor' %}
-                        <a href="{% url 'prescription_create' patient_id %}" class="btn btn-primary mt-3">Add New Prescription</a>
+                        <div class="add-prescription-btn-container">
+                            <a href="{% url 'prescription_create' patient_id %}" class="btn btn-primary">Add New Prescription</a>
+                        </div>
                     {% endif %}
                 </div>
             </div>
-        </div>   
+        </div>
     </div>
+</div>
 {% endblock %}

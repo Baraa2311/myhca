@@ -1,0 +1,32 @@
+{% extends '../_base.html' %}
+{% load static %}
+{% block title %}Appointments{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
+{% block content %}
+    <div class="appointments-page">
+        <h2>Appointments for Dr. {{ appointments.0.doctor.name }}</h2>
+        
+        {% if appointments %}
+            <ul class="appointments-list">
+                {% for appointment in appointments %}
+                    <li class="appointment-item">
+                        <div class="appointment-details">
+                            <strong>{{ appointment.patient.name }}</strong>
+                            <p>Date: {{ appointment.date }}</p>
+                            <p>Time: {{ appointment.time }}</p>
+                            <p>Duration: {{ appointment.duration }}</p>
+                            <p>Status: {{ appointment.status }}</p>
+                        </div>
+                        <div class="appointment-actions">
+                            <!-- Future actions like edit or delete can go here -->
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-appointments">No appointments found.</p>
+        {% endif %}
+    </div>
+{% endblock %}

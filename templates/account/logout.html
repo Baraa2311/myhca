@@ -1,16 +1,16 @@
 {% extends '../_base.html' %}
 {% block title %}Log Out{% endblock %}
 {% block content %}
-    <div class="container">
+    <div class="container logout-container">
         <div class="logout-form">
-            <h1>Log Out</h1>
-            <p>Are you sure you want to log out?</p>
+            <h1 class="logout-title">Log Out</h1>
+            <p class="logout-message">Are you sure you want to log out?</p>
             <form method="post" action="{% url 'account_logout' %}">
                 {% csrf_token %}
-                <div class="form-group">
+                <div class="form-group logout-form-group">
                     {{ form }}
                 </div>
-                <button class="btn btn-danger" type="submit">Log Out</button>
+                <button class="btn btn-danger logout-button" type="submit">Log Out</button>
             </form>
         </div>
     </div>

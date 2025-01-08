@@ -1,9 +1,21 @@
-{% extends '../_base.html' %} 
-{% block content %} 
-<h1>Delete Diagnostic</h1> 
-<form action="" method="post">
-{% csrf_token %} 
-<p>Are you sure you want to delete "{{ diagnostic }}"?</p> 
-<input type="submit" value="Confirm" /> 
-</form> 
-{% endblock content %}
+{% extends '../homepages/doctor_home.html' %}
+{% load static %}
+{% block title %}Delete Diagnostic{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
+{% block content %}
+<div class="delete-diagnostic-container">
+    <div class="delete-diagnostic-form">
+        <h1 class="delete-diagnostic-title">Delete Diagnostic</h1>
+        <form action="" method="post">
+            {% csrf_token %}
+            <p class="delete-diagnostic-confirmation-text">Are you sure you want to delete "{{ diagnostic }}"?</p>
+            <div class="delete-diagnostic-actions">
+                <input type="submit" value="Confirm" class="delete-diagnostic-btn-confirm" />
+              
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,22 +1,26 @@
-{% extends '../_base.html' %}
+{% extends '../homepages/doctor_home.html' %}
+{% load static %}
 {% block title %}Medical Files{% endblock %}
-{% block content %}
-<div class="hero">
-    <h1>Medical Files</h1>
-</div>
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
 
-<div class="files-list">
+{% block content %}
+<div class="doctor-files-container">
     {% if files %}
-    <ul>
+    <ul class="doctor-files-list">
         {% for file in files %}
-        <li>
-            <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a> 
-            ({{ file.file_type }}, Uploaded: {{ file.uploaded_at|date:"Y-m-d H:i" }})
+        <li class="doctor-file-item">
+            <a href="{{ file.file.url }}" target="_blank" class="doctor-file-name">{{ file.file.name }}</a>
+            <div class="doctor-file-details">
+                <span class="doctor-file-type">{{ file.file_type }}</span>
+                <span class="doctor-file-uploaded">Uploaded: {{ file.uploaded_at|date:"Y-m-d H:i" }}</span>
+            </div>
         </li>
         {% endfor %}
     </ul>
     {% else %}
-    <p>No files uploaded yet.</p>
+    <p class="doctor-no-files">No files uploaded yet.</p>
     {% endif %}
 </div>
 {% endblock %}

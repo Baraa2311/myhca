@@ -1,46 +1,31 @@
-{% extends '../_base.html' %}
+{% extends '../homepages/doctor_home.html' %}
+
 {% load static %}
 {% block title %}Edit Medical Advice{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
 
 {% block content %}
-  <div class="container my-5">
-    <h2 class="text-center mb-4">Edit Medical Advice</h2>
+  <div class="container my-5 doctor-edit-advice-container">
+    <h2 class="text-center mb-4 doctor-edit-advice-title">Edit Medical Advice</h2>
 
     <div class="row">
       <div class="col-md-8 offset-md-2">
-        <div class="card shadow-lg">
+        <div class="card doctor-edit-advice-card shadow-lg">
           <div class="card-body">
             <form method="post" enctype="multipart/form-data">
               {% csrf_token %}
-              {{ form.as_p }}
-              <div class="form-group mt-3">
-                <button type="submit" class="btn btn-warning btn-lg w-100">Update Advice</button>
+              <div class="form-group doctor-edit-advice-form-group">
+                {{ form.as_p }}
+              </div>
+              <div class="form-group doctor-edit-advice-submit-group mt-4">
+                <button type="submit" class="btn doctor-edit-advice-btn w-100">Update Advice</button>
               </div>
             </form>
           </div>
         </div>
       </div>
     </div>
-
   </div>
-
-  <style>
-    .card {
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .card:hover {
-      transform: translateY(-10px);
-    }
-
-    .btn-warning {
-      background-color: #f0ad4e;
-      border-color: #f0ad4e;
-    }
-
-    .btn-warning:hover {
-      background-color: #ec971f;
-      border-color: #d58512;
-    }
-  </style>
 {% endblock %}

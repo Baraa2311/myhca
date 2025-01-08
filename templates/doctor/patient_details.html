@@ -1,19 +1,24 @@
-{% extends '../_base.html' %}
+{% extends '../homepages/doctor_home.html' %}
+{% load static %}
+{% block title %}Patient{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="profile-container">
-    <div class="profile-header">
-        <div class="profile-image">
-                <img src="{{ patient.profile_image.url }}" alt="{{ patient.name }}">  
+<div class="patient-profile-container">
+    <div class="patient-profile-header">
+        <div class="patient-profile-image">
+            <img src="{{ patient.profile_image.url }}" alt="{{ patient.name }}" class="patient-image">
         </div>
-        <div class="profile-info">
-            <h2>{{ patient.name }}</h2>
-            <p>Email: {{ patient.email }}</p>
-            <p>Phone: {{ patient.phone_number }}</p>
-            <p>DOB: {{ patient.date_of_birth }}</p>
-            <a href="{% url 'patient_records' patient.pk %}" class="btn btn-primary">Medical Records</a>
-            <a href="{% url 'patient_diagnostics' patient.pk %}" class="btn btn-primary">Diagnostics</a>
-               <a href="{% url 'patient_prescriptions' patient.pk %}" class="btn btn-primary">Prescriptions</a>
+        <div class="patient-profile-info">
+            <h2 class="patient-name">{{ patient.name }}</h2>
+            <p class="patient-email">Email: {{ patient.email }}</p>
+            <p class="patient-phone">Phone: {{ patient.phone_number }}</p>
+            <p class="patient-dob">DOB: {{ patient.date_of_birth }}</p>
+            <a href="{% url 'patient_records' patient.pk %}" class="btn btn-primary patient-btn">Medical Records</a>
+            <a href="{% url 'patient_diagnostics' patient.pk %}" class="btn btn-primary patient-btn">Diagnostics</a>
+            <a href="{% url 'patient_prescriptions' patient.pk %}" class="btn btn-primary patient-btn">Prescriptions</a>
         </div>
     </div>
 </div>

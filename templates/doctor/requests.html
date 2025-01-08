@@ -1,14 +1,16 @@
-{% extends '../_base.html' %}
+{% extends '../homepages/doctor_home.html' %}
 
 {% block content %}
-{% for request in pending_requests %}
-<div class="request-card">
-    <h4>{{ request.patient.name }}</h4>
-    <p><strong>Request Status:</strong> {{ request.status }}</p>
-    <button class="button accept-button" onclick="updateRequest('{{ request.patient.id }}', 'accept')">Accept</button>
-    <button class="button reject-button" onclick="updateRequest('{{ request.patient.id }}', 'reject')">Reject</button>
+<div class="pending-requests-page">
+    {% for request in pending_requests %}
+    <div class="request-card">
+        <h4>{{ request.patient.name }}</h4>
+        <p><strong>Request Status:</strong> {{ request.status }}</p>
+        <button class="button accept-button" onclick="updateRequest('{{ request.patient.id }}', 'accept')">Accept</button>
+        <button class="button reject-button" onclick="updateRequest('{{ request.patient.id }}', 'reject')">Reject</button>
+    </div>
+    {% endfor %}
 </div>
-{% endfor %}
 {% endblock %}
 
 {% block extra_js %}    

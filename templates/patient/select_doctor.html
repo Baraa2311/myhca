@@ -1,17 +1,239 @@
-{% extends "../_base.html" %}
+ 
+
+{% extends "../homepages/patient_home.html" %}
 {% load static %}
-{% block content %}
-<div class="hero">
+    {% block extra_styles %}
+    <style>
+    /* Modal Styles */
+    .modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        width: 80%;
+        max-width: 400px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        opacity: 1;
+        pointer-events: auto;
+    }
+   
+    
+     .modal.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }'
+
+    .modal-content {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    /* General Button Styling */
+    .button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .button:hover {
+        background-color: #0056b3;
+    }
+
+    .button:active {
+        background-color: #003f7f;
+    }
+
+    /* Doctor Cards */
+    .doctor-card {
+        background-color: #fff;
+        border: 1px solid #e1e1e1;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        max-width: 250px;
+        width: 100%;
+    }
+
+    .doctor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .doctor-card.selected {
+        border-color: #28a745;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+        background-color: #e8f5e9;
+    }
+
+    .doctor-card.pending {
+        border-color: #ffa500;
+        box-shadow: 0 4px 12px rgba(255, 165, 0, 0.2);
+        background-color: #fff3e0;
+    }
+
+    .doctor-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        justify-content: center;
+    }
+
+    .profile-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+        border: 3px solid #ddd;
+        transition: transform 0.3s ease;
+    }
+
+    .profile-img:hover {
+        transform: scale(1.05);
+    }
+
+    /* Specialty Section */
+    .specialties {
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+    }
+
+    .specialty-section {
+        background-color: #f9f9f9;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .specialty-section h3 {
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+    /* Book Appointment Modal */
+    #appointment-modal {
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    #appointment-modal h3 {
+        margin-bottom: 1rem;
+        font-size: 1.6rem;
+        color: #007bff;
+    }
+
+    #appointment-modal form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #appointment-modal input, #appointment-modal select {
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+
+    /* Modal Close Button */
+    .modal .button {
+        background-color: #ff4136;
+        margin-top: 1rem;
+    }
+
+    .modal .button:hover {
+        background-color: #c0392b;
+    }
+
+    /* CTA Button */
+    .cta-button {
+        background-color: #28a745;
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .cta-button:hover {
+        background-color: #218838;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .doctor-cards {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .specialties {
+            padding: 1rem;
+        }
+
+        .doctor-card {
+            max-width: 100%;
+        }
+    }
+
+    /* Additional Styling for the Hero Section */
+    .hero {
+        background-color: #007bff;
+        color: #fff;
+        padding: 2rem 3rem;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 3rem;
+    }
+
+    .hero h1 {
+        font-size: 2.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+     
+</style>
+    {% endblock %}
+
+{% block hero %}
+  <div class="hero">
     <h1>Select a Doctor</h1>
     <p>Choose your preferred doctor by specialty or view your currently selected doctors.</p>
+      <a href="{% url 'custom_login_redirect' %}" class="cta-button cta-doctor">Dashboard</a>
 </div>
+{% endblock %}
+{% block content %}
+
 
 <section class="services">
     <h2>Your Selected Doctors</h2>
     <div class="selected-doctors">
         {% if relations %}
             {% for relation in relations %}
-            {{relation.doctor.profile_image.url}}
+           
     <div class="doctor-card {% if relation.status == 'Pending' %}pending{% else %}selected{% endif %}">
         <img src="{{ relation.doctor.profile_image.url }}" alt="{{ relation.doctor.name }}" class="profile-img">
         <h4>Dr. {{ relation.doctor.name }}</h4>
@@ -19,7 +241,9 @@
          <p><strong>Status:</strong> {{ relation.status }}</p>
         <p>{{ relation.doctor.bio }}</p>
         <button class="button details-button" onclick="location.href='{% url 'doctor_details' relation.doctor.id %}'">Details</button>
-        <button class="button delete-button" onclick="location.href='{% url 'delete_doctor' relation.doctor.id %}'">Delete</button>
+       
+      <button class="button delete-button"  onclick="deleteDoctor({{ relation.doctor.id }})">Delete</button>
+   
         {% if relation.status != 'Pending' %}
        
              {% if relation.doctor.has_appointment %}
@@ -60,6 +284,7 @@
                                 <h4>Dr. {{ doctor.name }}</h4>
                                 <p>{{ doctor.bio }}</p>           
                                 <button class="button select-button" data-doctorid="{{ doctor.id }}" data-specialty="{{ doctor.specialty }}" onclick="save_doc('{{ doctor.id }}', '{{ doctor.specialty }}')">Select</button>
+                
                                 
                             </div>
                         {% endif %}
@@ -91,33 +316,18 @@
     </div>
 </div>
 
-<script>
-
-document.addEventListener("DOMContentLoaded", function () {
-    const dateInput = document.getElementById("date");
-    const today = new Date();
-    const formattedDate = today.toISOString().split("T")[0]; // Format date as YYYY-MM-DD
-    dateInput.setAttribute("min", formattedDate); // Set the minimum date
-});
 
 
-    let selectedDoctorId = null;
 
-    // Open the booking modal
-    function openBookingModal(doctorId) {
-        selectedDoctorId = doctorId;
-        
-        document.getElementById('appointment-modal').classList.remove('hidden');
-    }
+{% endblock %}
+{% block extra_js %}
+<script >
 
-    // Close the booking modal
-    function closeBookingModal() {
-        document.getElementById('appointment-modal').classList.add('hidden');
-    }
-
-    // Save a selected doctor
+  // Save a selected doctor
     function save_doc(docId, specialty) {
+    
         const formData = new FormData();
+        
         formData.append("specialty", specialty);
         formData.append("doctor_id", docId);  
         fetch("{% url 'select_doctor' %}", {
@@ -136,6 +346,63 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Error: " + error.message);
         });
     }
+    
+    function deleteDoctor(docId) {            
+            
+            if (!docId) {
+                console.error("Doctor ID is missing or invalid."); 
+                return;
+            }
+
+            if (!confirm("Are you sure you want to delete this doctor?")) return; 
+            
+            fetch("{% url 'delete_doctor' %}", { 
+                method: "DELETE",  // Ensure this is DELETE
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",  // Make sure CSRF token is passed correctly
+                },
+                body: JSON.stringify({
+                    doctor_id: docId
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert("Doctor deleted successfully!");
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                alert("An error occurred: " + error.message);
+            });
+        }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const dateInput = document.getElementById("date");
+    const today = new Date();
+    const formattedDate = today.toISOString().split("T")[0]; // Format date as YYYY-MM-DD
+    dateInput.setAttribute("min", formattedDate); // Set the minimum date
+});
+
+
+    let selectedDoctorId = null;
+
+    // Open the booking modal
+    function openBookingModal(doctorId) {
+    
+        selectedDoctorId = doctorId;
+        
+        document.getElementById('appointment-modal').classList.remove('hidden');
+        
+    }
+
+    // Close the booking modal
+    function closeBookingModal() {
+        document.getElementById('appointment-modal').classList.add('hidden');
+    } 
     
     document.getElementById('appointment-form').addEventListener('submit', function (event) {
     event.preventDefault();
@@ -250,178 +517,6 @@ document.getElementById('date').addEventListener('change', function () {
             alert("An error occurred: " + error.message);
         });
     }
+
 </script>
-
-<style>
-    .modal {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        border-radius: 8px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-    }
-    .modal.hidden {
-        display: none;
-    }
-    .modal-content {
-        max-width: 400px;
-        text-align: center;
-    }
-    .modal ul {
-        list-style: none;
-        padding: 0;
-        margin: 1rem 0;
-    }
-    .modal li {
-        margin: 0.5rem 0;
-    }
-    .modal .button {
-        margin-top: 1rem;
-    }
-        .specialties {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-    .specialty-section {
-        background-color: #f9f9f9;
-        padding: 1rem;
-        border-radius: 8px;
-    }
-    .doctor-cards {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-    .doctor-card {
-        background-color: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 1rem;
-        text-align: center;
-        max-width: 200px;
-    }
-    .profile-img {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-bottom: 1rem;
-    }
-    .button {
-        background-color: #007bff;
-        color: white;
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-        text-decoration: none;
-    }
-    .button:hover {
-        background-color: #0056b3;
-    }
-    
-  
-
-    .switch-button {
-        background-color: #28a745;
-    }
-
-    .switch-button:hover {
-        background-color: #218838;
-    }
-
-    .selected-message {
-        color: green;
-        font-weight: bold;
-        margin: 0.5rem 0;
-    }
-    /* Styles for the doctor's cards */
-    .doctor-card.selected {
-        border-color: #28a745;
-        box-shadow: 0 0 10px #28a745;
-    }
-    .doctor-card.pending{
-        border-color: orange;
-        box-shadow: 0 0 10px orange;
-    }
-</style>
-<style>
-    .modal {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        border-radius: 8px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-    }
-    .modal.hidden {
-        display: none;
-    }
-    .modal-content {
-        max-width: 400px;
-        text-align: center;
-    }
-    .modal ul {
-        list-style: none;
-        padding: 0;
-        margin: 1rem 0;
-    }
-    .modal li {
-        margin: 0.5rem 0;
-    }
-    .modal .button {
-        margin-top: 1rem;
-    }
-    .specialties {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-    .specialty-section {
-        background-color: #f9f9f9;
-        padding: 1rem;
-        border-radius: 8px;
-    }
-    .doctor-cards {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-    .doctor-card {
-        background-color: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 1rem;
-        text-align: center;
-        max-width: 200px;
-    }
-    .profile-img {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-bottom: 1rem;
-    }
-    .button {
-        background-color: #007bff;
-        color: white;
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-        text-decoration: none;
-    }
-    .button:hover {
-        background-color: #0056b3;
-    }
-    
-    .switch-button {
-        background-color: #28a745;
-    }
-{% endblock %}
+    {% endblock %}

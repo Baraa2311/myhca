@@ -1,10 +1,15 @@
 from django.urls import path
-from .views import  PatientSignUpView, DoctorSignUpView, RegistrationPendingView, DoctorHomeView, PatientHomeView,ProfileDetailView, ProfileUpdateView
+from .views import PatientSignUpView, DoctorSignUpView, RegistrationPendingView, DoctorHomeView, PatientHomeView,ProfileDetailView, ProfileUpdateView,MarkAllNotificationsReadView
 from . import views
 
 
 
+
+
 urlpatterns = [
+    # Your other URL patterns
+    path('notifications/read-all/', MarkAllNotificationsReadView.as_view(), name='notifications_read_all'),
+
     path('profile/', ProfileDetailView.as_view(), name='profile'),
     path('profile/edit/', ProfileUpdateView.as_view(), name='profile_edit'),
 
@@ -24,7 +29,7 @@ urlpatterns = [
     # Select Doctor URL
     path("select_doctor/", views.select_doctor, name="select_doctor"),
     path("doctor_requests/", views.doctor_requests, name="doctor_requests"),
-    path("delete_doctor/<int:doctor_id>/", views.delete_doctor, name="delete_doctor"),
+    path("delete_doctor/", views.delete_doctor, name="delete_doctor"),
     path("doctor_details/<int:doctor_id>/", views.doctor_details, name="doctor_details"),
     
     

@@ -1,14 +1,17 @@
 {% extends '../_base.html' %}
-
+{% load static %}
 {% block title %}Doctor Dashboard{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
+
+{% block hero_m %}
+   <h1>Welcome, Dr. {{ user.name }}!</h1>
+   <p>Stay on top of your appointments and patient care.</p>
+{% endblock %}
 
 {% block content %}
-<div class="hero">
-    <h1>Welcome, Dr. {{ user.name }}!</h1>
-    <p>Stay on top of your appointments and patient care.</p>
-</div>
-
-<section class="services">
+<section class="doctor-dashboard services">
     <h2>Doctor Features</h2>
     <div class="service-cards">
         <div class="service-card">
@@ -16,24 +19,24 @@
             <p>See Patients pending requests.</p>
             <a href="{% url 'doctor_requests' %}" class="button">Show</a>
         </div>
-           <div class="service-cards">
+
         <div class="service-card">
             <h3>Patients</h3>
             <p>See your assigned patients.</p>
             <a href="{% url 'patient_list' %}" class="button">Show</a>
         </div>
-    <div class="service-cards">
+
         <div class="service-card">
             <h3>Appointments</h3>
-            <p>Check your upcoming and past appointments.</p>
-            <a href="" class="button">View Appointments</a>
+            <p>Check all your appointments.</p>
+            <a href="{% url 'doctor_appointments' doctor_id=user.id %}" class="button">View Appointments</a>
         </div>
+
         <div class="service-card">
             <h3>Advice</h3>
             <p>See and manage medical advice for your patients.</p>
             <a href="{% url 'advice_list' %}" class="button">View Advice</a>
         </div>
-      
     </div>
 </section>
 {% endblock %}

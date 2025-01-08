@@ -22,8 +22,15 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from mailjet_rest import Client
-from notifications.signals import notify
 from django.contrib.auth import get_user_model
+from payments.models import Plan,UserSubscription
+import shutil
+from django.core.exceptions import ValidationError
+from django.utils.timezone import now
+from datetime import timedelta
+from django.templatetags.static import static
+
+
 
 
 # Set up logging
@@ -36,13 +43,19 @@ USER_TYPE_PREFIX = {
     'patient': '3'
 }
 
+
+
+
 # Enum class for user types
 class UserType(Enum):
-    ADMIN = 'administrator'
+    ADMIN = 'admin'
     DOCTOR = 'doctor'
     PATIENT = 'patient'
 
+
+
 default_img = "static/images/profile_images/default.jpeg"
+
 
 def generate_id(user_type):
     prefix = USER_TYPE_PREFIX.get(user_type, '9')
@@ -54,13 +67,61 @@ def generate_id(user_type):
             
 def rename_file(instance, file_type, id):
     try:
+        # Get the file extension and path
         extension = instance.name.split('.')[-1]
-        filename = f"{slugify(id)}_{file_type}.{extension}"
-        instance.name = os.path.join(filename)
+        file_path = os.path.dirname(instance.name)  # Get the directory path
+        new_filename = f"{slugify(id)}_{file_type}.{extension}"  # Create new file name
+        new_file_path = os.path.join(file_path, new_filename)  # New file path
+        
+        # Rename the file on the file system
+        if os.path.exists(instance.name):
+            shutil.move(instance.name, new_file_path)  # Rename file in the directory
+
+        # Update the file name in the database
+        instance.name = new_file_path  # Update the field to the new name
+
     except Exception as e:
         logger.error(f"Error renaming file for {id}: {e}")
         raise ValidationError(f"Error renaming file: {str(e)}")
+        
 
+
+def send_mail(recepiant,subject,message):
+      print('sending mail')
+      if settings.USE_MAILJET:
+                # Create a Mailjet client
+                mailjet = Client(auth=(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD), version='v3.1')
+
+                data = {
+                    'Messages': [
+                        {
+                            'From': {
+                                'Email': 'baraahca2001@gmail.com',
+                                'Name': 'Buolink',
+                            },
+                            'To': [
+                                {
+                                    'Email': recepiant.email,
+                                    'Name': recepiant.name,
+                                }
+                            ],
+                            'Subject': subject,
+                            'TextPart': message,
+                            'HTMLPart': message,
+                        }
+                    ]
+                }
+
+                result = mailjet.send.create(data=data)
+                if result.status_code != 200:
+                    print('error')
+                    logger.error(f"Error sending email: {result.text}")
+      else:
+          print(f"Sending email to {recepiant.email}:")
+          print(f"Subject: {subject}")
+          print(f"Message:\n{message}")
+                
+                
 # Custom User Manager
 class UserManager(BaseUserManager):
     def create_user(self, id, email, name, password=None, **extra_fields):
@@ -76,7 +137,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('user_type', UserType.ADMIN.name)
+        extra_fields.setdefault('user_type', 'admin')
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
@@ -149,67 +210,53 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
         # Set the user_type based on the class name if not already set
         if not self.user_type:
             self.user_type = self.__class__.__name__.lower()
-            print(self.user_type)
+            
 
         # Generate a unique ID if not already set
         if not self.id:
             self.id = generate_id(self.user_type)
+            if self.profile_image and self.profile_image !=default_img:
+                rename_file(self.profile_image, 'img', self.id)
         
         # Generate a secure password if none is provided
+        if not self.is_active:
+            ADMINS= list(UserBase.objects.filter(user_type=UserType.ADMIN.value))
+            subject = f"New User, {self.name}"
+            message = render_to_string('mail/new_user.html', {
+                'name':self.name,
+                'id': self.id,
+                'user_type':self.user_type,
+            })
+            #edit recepient to include all admins
+            for admin in ADMINS:
+                send_mail(admin,subject,message)
         if not self.password and self.is_active:
             genpassword = generate_secure_password()
             
-            subject = f"Welcome to the Healthcare App, {self.name}"
-            message = render_to_string('mail/credentials_email.html', {
+            subject = f"Welcome to Biolink, {self.name}"
+            credentials_message = render_to_string('mail/credentials_email.html', {
                 'name':self.name,
                 'id': self.id,
                 'password': genpassword,
             })
+            send_mail(self,subject,credentials_message)
             
-            
-            if settings.USE_MAILJET:
-                # Create a Mailjet client
-                mailjet = Client(auth=(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD), version='v3.1')
-
-                data = {
-                    'Messages': [
-                        {
-                            'From': {
-                                'Email': 'baraahca2001@gmail.com',
-                                'Name': 'Healthcare App',
-                            },
-                            'To': [
-                                {
-                                    'Email': self.email,
-                                    'Name': self.name,
-                                }
-                            ],
-                            'Subject': subject,
-                            'TextPart': message,
-                            'HTMLPart': message,
-                        }
-                    ]
-                }
-
-                result = mailjet.send.create(data=data)
-                if result.status_code != 200:
-                    print('error')
-                    logger.error(f"Error sending email: {result.text}")
-            else:
-                print(f"Sending email to {self.email}:")
-                print(f"Subject: {subject}")
-                print(f"Message:\n{message}")
-
             self.set_password(genpassword)
-        
+        print(self.user_type)
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name}" if self.is_doctor else f"Patient: {self.name}"
+        return f"{self.user_type}: {self.name}"
 
     def delete(self, *args, **kwargs):
+        send_mail(self,subject,credentials_message)
         if not self.profile_image == default_img:
             delete_file_if_exists(self.profile_image)
+            subject = f"Your Biolink account has been deleted, {self.name}"
+            deleted_message = render_to_string('mail/account_deleted.html', {
+                'name':self.name,
+            })
+            
         super().delete(*args, **kwargs)
 
     @property
@@ -224,12 +271,20 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
     def is_administrator(self):
         return self.user_type == UserType.ADMIN.value
 
+
+ 
+      
+
+
 # Doctor-specific model
 class Doctor(UserBase):
     class Specialty(models.TextChoices):
-        Dentist = 'Dentist', _('Dentist')
-        Psychiatrist = 'Psychiatrist', _('Psychiatrist')
-        ENT = 'ENT', _('ENT')
+        Psychiatry = 'Psychiatry', _('Psychiatry')
+        Diagnostic = 'Diagnostic', _('Diagnostic')
+        Ripperdoc = 'Ripperdoc', _('Ripperdoc')
+        NeuroSurgery = 'Neuro-surgery', _('Neuro-surgery')
+        InfectiousDisease = 'Infectious Disease', _('Infectious Disease')
+        
 
     license_number = models.CharField(max_length=255)
     degree_certificate = models.FileField(upload_to='static/certificates/', validators=[validate_pdf_file], blank=True, null=True)
@@ -260,19 +315,18 @@ class Doctor(UserBase):
         if self.degree_certificate:
             rename_file(self.degree_certificate, 'degree_certificate', self.id)
             
+        
         super().save(*args, **kwargs)
         if is_new:
             DoctorSchedule.create_default_schedule(self)
 
 
 
-# Patient-specific model
+
+
 class Patient(UserBase):
     medical_history_file = models.FileField(upload_to='static/patients/medical_history/', validators=[validate_pdf_file], blank=True, null=True)
-    
     date_of_birth = models.DateField()
-    storage_limit = models.BigIntegerField(default=52428800)  # 50 MB default limit in bytes
-    used_storage = models.BigIntegerField(default=0)
     doctors = models.ManyToManyField('Doctor', through='DoctorPatient', related_name='assigned_patients')
 
     class Meta:
@@ -289,22 +343,68 @@ class Patient(UserBase):
         super().delete(*args, **kwargs)
 
     def has_space_for(self, file_size):
-        return (self.used_storage + file_size) <= self.storage_limit
+        """
+        Checks if the user has enough storage space left in their subscription plan.
+        """
+        try:
+            subscription = self.usersubscription
+        except UserSubscription.DoesNotExist:
+            raise ValidationError("This patient does not have an active subscription.")
+        
+        common=1
+        if subscription.plan.data_type == 'MB':
+            common*=1024
+        elif subscription.plan.data_type == 'GB':
+            common=1024*1024
+        remaining_space = (subscription.plan.data_limit * common) - (subscription.data_used*common)
+        return file_size <= remaining_space  # file_size is in KB
 
     def update_used_storage(self, file_size):
+        """
+        Updates the used storage for the user's subscription if there is enough space.
+        """
+        try:
+            subscription = self.usersubscription
+        except UserSubscription.DoesNotExist:
+            raise ValidationError("This patient does not have an active subscription.")
+
         if not self.has_space_for(file_size):
-            raise ValidationError(_('Not enough storage available for this file.'))
-        self.used_storage += file_size
-        self.save()
- 
-    def save(self, *args, **kwargs):         
-        if not self.id:
+            raise ValidationError("Not enough storage available in the current plan.")
+
+        common=1
+        if subscription.plan.data_type == 'MB':
+            common*=1024
+        elif subscription.plan.data_type == 'GB':
+            common=1024*1024
+            
+        subscription.data_used += file_size /(common) # file_size is in KB
+        subscription.save()
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding  # Check if the object is being created
+        if is_new:
             self.id = generate_id(self.user_type)
-        
+
         if self.medical_history_file:
             rename_file(self.medical_history_file, 'medical_history_file', self.id)
 
         super().save(*args, **kwargs)
+
+        # Assign free plan after the object is created
+        if is_new:
+            free_plan = Plan.objects.filter(name__iexact='free').first()
+            if not free_plan:
+                raise ValidationError("Free plan is not defined in the database.")
+
+            # Create a subscription for the new patient
+            UserSubscription.objects.create(
+                user=self,
+                plan=free_plan,
+                data_used=0,
+                plan_start_date=now().date(),
+                plan_end_date=now().date() + timedelta(days=free_plan.duration),
+                active=True,
+            )
 
 # Relationship between Doctor and Patient
 class DoctorPatient(models.Model):

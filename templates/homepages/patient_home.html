@@ -1,13 +1,17 @@
 {% extends '../_base.html' %}
-
+{% load static %}
 {% block title %}Patient Dashboard{% endblock %}
-
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/patient_style.css' %}">
+{% endblock %}
 
 {% block hero %}
-<div class="hero">
+<section class="hero">
+   <div class="container">
     <h1>Welcome, {{ user.name }}!</h1>
     <p>Manage your health and appointments with ease.</p>
 </div>
+ </section>
 {% endblock %}
 
 {% block content %}
@@ -22,7 +26,7 @@
         <div class="service-card">
             <h3>Medical Records</h3>
             <p>Access your past medical records and prescriptions.</p>
-            <a href="{% url 'view_medical_files' %}" class="button">View Records</a> |
+            <a href="{% url 'view_medical_files' %}" class="button">View Records</a> 
             <a href="{% url 'upload_medical_file' %}" class="button">Upload Records</a>
         </div>
         <div class="service-card">

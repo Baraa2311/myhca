@@ -1,4 +1,9 @@
 {% extends '../_base.html' %}
+{% load static %}
+{% block title %}Profile{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/patient_style.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="profile-container">
@@ -8,15 +13,15 @@
         </div>
         <div class="profile-info">
             <h2>{{ user_profile.name }}</h2>
-            <p>Email: {{ user_profile.email }}</p>
-            <p>Phone: {{ user_profile.phone_number }}</p>
+            <p><strong>Email:</strong> {{ user_profile.email }}</p>
+            <p><strong>Phone: </strong>{{ user_profile.phone_number }}</p>
             {% if user_profile.is_patient %}
-                <p>Type: Patient</p>
+                <p><strong>Type:</strong> Patient</p>
             {% elif user_profile.is_doctor %}
-                <p>Type: Doctor</p>
-                <p>Bio: {{ user_profile.bio }}</p>
+                <p><strong>Type:</strong> Doctor</p>
+                <p><strong>Bio:</strong> <br>{{ user_profile.bio|linebreaksbr }}</p>
             {% elif user_profile.is_administrator %}
-                <p>Type: Administrator</p>
+                <p><strong>Type: </strong>Administrator</p>
             {% endif %}
             <a href="{% url 'profile_edit' %}" class="btn btn-primary">Edit Profile</a>
         </div>

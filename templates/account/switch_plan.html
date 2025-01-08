@@ -1,0 +1,108 @@
+{% extends "../_base.html" %}
+{% load static %}
+{% block title %}Confirm Plan Switch{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/change_plan.css' %}">
+<!-- Add Font Awesome for the spinner icon -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="text-center mb-5">
+    <h1>Confirm Your Plan Switch</h1>
+    <p>You are about to switch from the <strong>{{ current_plan.name }}</strong> plan to the <strong>{{ new_plan.name }}</strong> plan.</p>
+    <p>New Plan Price: ${{ new_plan.price }}</p>
+    <p>New Plan Data Limit: {{ new_plan.data_limit }} GB</p>
+    <p>New Plan Duration: {{ new_plan.duration }} months</p>
+    <hr>
+
+    <!-- Stripe Payment Form -->
+    <form id="payment-form" method="POST">
+        {% csrf_token %}
+        <div id="card-element"></div> <!-- A Stripe Element will be inserted here. -->
+        <!-- Display error messages below the form -->
+        <div id="card-errors" class="alert alert-danger" role="alert" style="display: none;"></div>
+        <button id="submit" class="btn btn-success">Confirm Switch and Pay</button>
+    </form>
+
+    <!-- Loading Spinner (Font Awesome) -->
+    <div id="loading-spinner" class="d-none">
+        <i class="fas fa-spinner fa-spin fa-lg"></i> Processing your payment...
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');  // Inject Stripe public key from Django settings
+    var elements = stripe.elements();
+    var card = elements.create('card');
+    card.mount('#card-element');
+
+    var form = document.getElementById('payment-form');
+    var loadingSpinner = document.getElementById('loading-spinner');  // Loading spinner element
+
+    // Ensure the spinner is hidden when the page loads
+    loadingSpinner.style.display = 'none';  // Initially hide the spinner
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Show loading spinner after form submission starts
+        loadingSpinner.style.display = 'block'; // Show spinner
+
+        // Create a payment method using the card element
+        stripe.createPaymentMethod('card', card).then(function(result) {
+            if (result.error) {
+                var errorElement = document.getElementById('card-errors');
+                errorElement.textContent = result.error.message;
+                errorElement.style.display = 'block';  // Show error message
+                loadingSpinner.style.display = 'none';  // Hide spinner
+            } else {
+                // Send payment method ID and plan ID to the backend to create a payment intent
+                fetch("{% url 'process_payment' new_plan.id %}", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        payment_method_id: result.paymentMethod.id,  // Send the payment method ID
+                        plan_id: "{{ new_plan.id }}",  // Send the selected plan ID
+                    }),
+                }).then(function(response) {
+                    return response.json();
+                }).then(function(data) {
+                    if (data.error) {
+                        var errorElement = document.getElementById('card-errors');
+                        errorElement.textContent = data.error;
+                        errorElement.style.display = 'block';  // Show error message
+                        loadingSpinner.style.display = 'none';  // Hide spinner
+                    } else if (data.client_secret) {
+                        // Handle the case where the payment intent requires further authentication
+                        stripe.confirmCardPayment(data.client_secret).then(function(result) {
+                            if (result.error) {
+                                var errorElement = document.getElementById('card-errors');
+                                errorElement.textContent = result.error.message;
+                                errorElement.style.display = 'block';  // Show error message
+                                loadingSpinner.style.display = 'none';  // Hide spinner
+                            } else {
+                                // Payment successful, redirect or update subscription
+                                window.location.href = "{% url 'change_plan' %}";  // Redirect to the 'change_plan' page
+                            }
+                        });
+                    } else if (data.message === 'Plan switched successfully without payment!') {
+                        // If plan switch is successful without payment (when the price is 0), redirect directly
+                        window.location.href = "{% url 'change_plan' %}";  // Redirect to the 'change_plan' page
+                    }
+                }).catch(function(error) {
+                    // Display an error alert if something went wrong
+                    var errorElement = document.getElementById('card-errors');
+                    errorElement.textContent = 'An error occurred: ' + error.message;
+                    errorElement.style.display = 'block';  // Show error message
+                    loadingSpinner.style.display = 'none';  // Hide spinner
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,105 +1,44 @@
-{% extends '../_base.html' %}
+{% extends '../homepages/doctor_home.html' %}
 {% load static %}
 {% block title %}Doctor Advice{% endblock %}
 
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/doctor_style.css' %}">
+{% endblock %}
+
 {% block content %}
-  <div class="container my-5">
-    <h2 class="text-center mb-4">Medical Advice</h2>
+  <div class="container my-5 doctor-advice-container">
+    <h2 class="text-center mb-5 doctor-advice-title">Medical Advice</h2>
 
     <!-- Add New Advice Button -->
     <div class="text-center mb-4">
-      <a href="{% url 'add_advice' %}" class="btn btn-success btn-lg">Add New Advice</a>
+      <a href="{% url 'add_advice' %}" class="btn doctor-add-advice-btn">Add New Advice</a>
     </div>
 
     <div class="row">
       {% for advice in medical_advice %}
         <div class="col-md-4 mb-4">
-          <div class="card shadow-lg border-light">
-           
-              <img src="{{ advice.image.url }}" alt="{{ advice.title }}" class="card-img-top" style="height: 200px; object-fit: cover;">
-            
+          <div class="card doctor-advice-card">
+            <img src="{{ advice.image.url }}" alt="{{ advice.title }}" class="card-img-top doctor-advice-img">
             <div class="card-body">
-              <h5 class="card-title">{{ advice.title }}</h5>
-              <p class="card-text">{{ advice.advice|truncatewords:30 }}</p>
-              <p class="text-muted small">By Dr. {{ advice.created_by.name }} on {{ advice.created_at|date:"F j, Y" }}</p>
+              <h5 class="card-title doctor-advice-card-title">{{ advice.title }}</h5>
+              <p class="card-text doctor-advice-card-text">{{ advice.advice|truncatewords:30 }}</p>
+              <p class="text-muted small doctor-advice-meta">By Dr. {{ advice.created_by.name }} on {{ advice.created_at|date:"F j, Y" }}</p>
 
-              <!-- Edit and Delete buttons -->
-              <a href="{% url 'edit_advice' pk=advice.pk %}" class="btn btn-warning">Edit</a>
-              <a href="{% url 'delete_advice' pk=advice.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this advice?');">Delete</a>
-
-              <a href="" class="btn btn-primary">Read More</a>
+              <!-- Buttons Container -->
+              <div class="button-group d-flex justify-content-between flex-wrap">
+                <div class="d-flex">
+                  <a href="{% url 'edit_advice' pk=advice.pk %}" class="btn btn-outline-secondary doctor-advice-edit-btn">Edit</a>
+                  <a href="{% url 'delete_advice' pk=advice.pk %}" class="btn btn-outline-danger doctor-advice-delete-btn" onclick="return confirm('Are you sure you want to delete this advice?');">Delete</a>
+                </div>
+                <a href="#" class="btn btn-outline-primary doctor-advice-read-more-btn">Read More</a>
+              </div>
             </div>
           </div>
         </div>
       {% empty %}
-        <p class="text-center w-100">No medical advice available at the moment.</p>
+        <p class="text-center w-100 doctor-no-advice">No medical advice available at the moment.</p>
       {% endfor %}
     </div>
   </div>
-
-  <style>
-    .card {
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .card:hover {
-      transform: translateY(-10px);
-    }
-
-    .card-body {
-      padding: 1.5rem;
-    }
-
-    .card-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .card-text {
-      font-size: 1rem;
-      color: #555;
-    }
-
-    .card-footer {
-      font-size: 0.85rem;
-      color: #888;
-    }
-
-    .btn-primary {
-      background-color: #007bff;
-      border-color: #007bff;
-    }
-
-    .btn-primary:hover {
-      background-color: #0056b3;
-      border-color: #004085;
-    }
-
-    .btn-warning {
-      background-color: #f0ad4e;
-      border-color: #f0ad4e;
-    }
-
-    .btn-warning:hover {
-      background-color: #ec971f;
-      border-color: #d58512;
-    }
-
-    .btn-danger {
-      background-color: #d9534f;
-      border-color: #d9534f;
-    }
-
-    .btn-danger:hover {
-      background-color: #c9302c;
-      border-color: #ac2925;
-    }
-
-    .banner-image {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 5px;
-    }
-  </style>
 {% endblock %}

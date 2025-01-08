@@ -1,5 +1,9 @@
 {% extends '../_base.html' %}
-
+{% load static %}
+{% block title %}Edit Profile{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/patient_style.css' %}">
+{% endblock %}
 {% block content %}
 <div class="profile-edit-container">
     <h1>Edit Profile</h1>
