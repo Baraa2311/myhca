@@ -16,7 +16,6 @@ django-storages==1.14.4
 django-suit==0.2.28
 django_notifications==0.1.dev0
 filelock==3.16.1
-gunicorn==23.0.0
 idna==3.10
 jmespath==1.0.1
 jsonfield==3.1.0
