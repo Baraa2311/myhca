@@ -23,7 +23,7 @@ STRIPE_TEST_PUBLIC_KEY = os.getenv('STRIPE_TEST_PUBLIC_KEY')
 STRIPE_TEST_SECRET_KEY = os.getenv('STRIPE_TEST_SECRET_KEY')
 
 # Allowed Hosts
-ALLOWED_HOSTS = ['hca.up.railway.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['hca.up.railway.app', 'localhost', '127.0.0.1','myhca-1.onrender.com']
 CSRF_TRUSTED_ORIGINS = ['https://hca.up.railway.app']
 
 # Email Configuration
