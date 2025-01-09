@@ -9,7 +9,7 @@
 <div class="profile-container">
     <div class="profile-header">
         <div class="profile-image">
-                <img src="{{ user_profile.profile_image.url }}" alt="{{ user_profile.name }}">  
+            <img src="{{ user_profile.profile_image.url }}" alt="{{ user_profile.name }}">  
         </div>
         <div class="profile-info">
             <h2>{{ user_profile.name }}</h2>
@@ -24,6 +24,7 @@
                 <p><strong>Type: </strong>Administrator</p>
             {% endif %}
             <a href="{% url 'profile_edit' %}" class="btn btn-primary">Edit Profile</a>
+            <a href="{% url 'account_reset_password' %}" class="btn btn-secondary">Reset Password</a>
         </div>
     </div>
 </div>
