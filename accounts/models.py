@@ -4,6 +4,7 @@ import secrets
 import os
 import logging
 import re
+from decimal import Decimal
 from django.utils.text import slugify
 from datetime import datetime
 from django.db import models
@@ -377,7 +378,9 @@ class Patient(UserBase):
         elif subscription.plan.data_type == 'GB':
             common=1024*1024
             
-        subscription.data_used += file_size /(common) # file_size is in KB
+        
+
+subscription.data_used += Decimal(file_size) / Decimal(1024)  # assuming you want to convert KB to MB
         subscription.save()
 
     def save(self, *args, **kwargs):
