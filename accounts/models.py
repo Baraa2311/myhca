@@ -380,7 +380,7 @@ class Patient(UserBase):
             
         
 
-subscription.data_used += Decimal(file_size) / Decimal(1024)  # assuming you want to convert KB to MB
+        subscription.data_used +=Decimal(file_size) / Decimal(1024)  
         subscription.save()
 
     def save(self, *args, **kwargs):
